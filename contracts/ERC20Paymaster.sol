@@ -6,13 +6,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPaymaster, ExecutionResult, PAYMASTER_VALIDATION_SUCCESS_MAGIC} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymaster.sol";
 import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymasterFlow.sol";
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 
-contract MyPaymaster is IPaymaster {
-    uint256 constant PRICE_FOR_PAYING_FEES = 1;
-
-    address public allowedToken;
+contract Paymaster is IPaymaster, Ownable {
 
     modifier onlyBootloader() {
         require(
@@ -23,9 +21,7 @@ contract MyPaymaster is IPaymaster {
         _;
     }
 
-    constructor(address _erc20) {
-        allowedToken = _erc20;
-    }
+    // constructor() {}
 
     function validateAndPayForPaymasterTransaction(
         bytes32,
@@ -55,8 +51,8 @@ contract MyPaymaster is IPaymaster {
                 (address, uint256, bytes)
             );
 
-            // Verify if token is the correct one
-            require(token == allowedToken, "Invalid token");
+            // We allow any token to be used for payment
+            // require(token == allowedToken, "Invalid token");
 
             // We verify that the user has provided enough allowance
             address userAddress = address(uint160(_transaction.from));
@@ -67,10 +63,8 @@ contract MyPaymaster is IPaymaster {
                 userAddress,
                 thisAddress
             );
-            require(
-                providedAllowance >= PRICE_FOR_PAYING_FEES,
-                "Min allowance too low"
-            );
+
+            require(providedAllowance >= amount, "Min allowance too low");
 
             // Note, that while the minimal amount of ETH needed is tx.gasPrice * tx.gasLimit,
             // neither paymaster nor account are allowed to access this context variable.
@@ -95,10 +89,7 @@ contract MyPaymaster is IPaymaster {
             (bool success, ) = payable(BOOTLOADER_FORMAL_ADDRESS).call{
                 value: requiredETH
             }("");
-            require(
-                success,
-                "Failed to transfer tx fee to the bootloader. Paymaster balance might not be enough."
-            );
+            require(success, "Failed to transfer funds to the bootloader");
         } else {
             revert("Unsupported paymaster flow");
         }
@@ -113,6 +104,15 @@ contract MyPaymaster is IPaymaster {
         uint256 _maxRefundedGas
     ) external payable override onlyBootloader {
         // Refunds are not supported yet.
+    }
+
+    function withdrawERC20(address _ERC20) external onlyOwner {
+        IERC20 token = IERC20(_ERC20);
+        token.transfer(msg.sender, token.balanceOf(address(this)));
+    }
+
+    function withdrawETH() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     receive() external payable {}

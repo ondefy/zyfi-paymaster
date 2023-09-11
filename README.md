@@ -30,7 +30,19 @@ WALLET_PRIVATE_KEY=123cde574ccff....
 
 ### Local testing
 
-In order to run test, you need to start the zkSync local environment. Please check [this section of the docs](https://v2-docs.zksync.io/api/hardhat/testing.html#prerequisites) which contains all the details.
+In order to run test, you need to start the zkSync local environment. This project uses the [in-memory node](https://era.zksync.io/docs/tools/testing/era-test-node.html#configuring-tests) as it's only on L2.
+Begin by installing era-test-node using the command:
+
+```cargo install --git https://github.com/matter-labs/era-test-node.git --locked```
+
+Rust should install it in the ~/.cargo/bin directory.
+
+To start the node, execute:
+
+```era_test_node run
+``` 
+P
+lease check [this section of the docs](https://v2-docs.zksync.io/api/hardhat/testing.html#prerequisites) which contains all the details.
 
 If you do not start the zkSync local environment, the tests will fail with error `Error: could not detect network (event="noNetwork", code=NETWORK_ERROR, version=providers/5.7.2)`
 
