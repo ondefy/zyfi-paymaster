@@ -33,13 +33,16 @@ WALLET_PRIVATE_KEY=123cde574ccff....
 In order to run test, you need to start the zkSync local environment. This project uses the [in-memory node](https://era.zksync.io/docs/tools/testing/era-test-node.html#configuring-tests) as it's only on L2.
 Begin by installing era-test-node using the command:
 
-```cargo install --git https://github.com/matter-labs/era-test-node.git --locked```
+```
+cargo install --git https://github.com/matter-labs/era-test-node.git --locked
+```
 
 Rust should install it in the ~/.cargo/bin directory.
 
 To start the node, execute:
 
-```era_test_node run
+```
+era_test_node run
 ``` 
 P
 lease check [this section of the docs](https://v2-docs.zksync.io/api/hardhat/testing.html#prerequisites) which contains all the details.
