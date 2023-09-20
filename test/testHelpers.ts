@@ -1,11 +1,11 @@
 import { Contract, Wallet } from "zksync-web3";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
-import * as ethers from "ethers";
+import { ethers, providers } from "ethers";
 
-async function deployContract(
+export async function deployContract(
   deployer: Deployer,
   contract: string,
-  params: any[],
+  params: any[]
 ): Promise<Contract> {
   const artifact = await deployer.loadArtifact(contract);
   const deploymentFee = await deployer.estimateDeployFee(artifact, params);
@@ -14,7 +14,11 @@ async function deployContract(
   return await deployer.deploy(artifact, params);
 }
 
-async function fundAccount(wallet: Wallet, address: string, amount: string) {
+export async function fundAccount(
+  wallet: Wallet,
+  address: string,
+  amount: string
+) {
   await (
     await wallet.sendTransaction({
       to: address,
@@ -23,4 +27,7 @@ async function fundAccount(wallet: Wallet, address: string, amount: string) {
   ).wait();
 }
 
-export { deployContract, fundAccount };
+export async function getTimestamp(provider: providers.JsonRpcProvider) {
+
+  return block.timestamp;
+}

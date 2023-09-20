@@ -9,9 +9,9 @@ import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/sy
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
+import "hardhat/console.sol";
 
 contract Paymaster is IPaymaster, Ownable {
-
     modifier onlyBootloader() {
         require(
             msg.sender == BOOTLOADER_FORMAL_ADDRESS,
@@ -51,9 +51,9 @@ contract Paymaster is IPaymaster, Ownable {
                 (address, uint256, bytes)
             );
 
-            // We allow any token to be used for payment
-            // require(token == allowedToken, "Invalid token");
-
+            //Validate that the message was signed by the Ondefy backend
+            //TODO
+            console.log("Data: ", data);
             // We verify that the user has provided enough allowance
             address userAddress = address(uint160(_transaction.from));
 
