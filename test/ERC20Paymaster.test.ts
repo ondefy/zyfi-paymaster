@@ -66,7 +66,7 @@ describe("ERC20Paymaster", function () {
 
     const gasPrice = await provider.getGasPrice();
     const minimalAllowance = ethers.BigNumber.from(1);
-    const expiration = (await helper.getTimestamp()).add(TX_EXPIRATION);
+    const expiration = ethers.BigNumber.from((await helper.getTimestamp()).add(TX_EXPIRATION));
 
     const messageHash = await getMessageHash(
       user.address,
@@ -82,14 +82,20 @@ describe("ERC20Paymaster", function () {
     console.log("Minimal allowance: ", minimalAllowance.toString());
     console.log("Expiration: ", expiration.toString());
 
+    const innerInput = ethers.utils.solidityPack(
+      ["address", "uint256"],
+      [user.address, expiration]
+    );
+    console.log("Expiration: ", expiration.toString());
+    console.log("Inner input: ", innerInput);
+
     const paymasterParams = utils.getPaymasterParams(
       paymaster.address.toString(),
       {
         type: payType,
         token: token,
         minimalAllowance,
-        innerInput: new Uint8Array(),
-        SignedMessageHash,
+        innerInput,
       }
     );
 
@@ -114,7 +120,7 @@ describe("ERC20Paymaster", function () {
     _from: Address,
     _token: Address,
     _amount: ethers.BigNumber,
-    _expiration: number
+    _expiration: ethers.BigNumber
   ) {
     return ethers.utils.keccak256(
       ethers.utils.solidityPack(
@@ -125,11 +131,7 @@ describe("ERC20Paymaster", function () {
   }
 
   it.only("Happy path: should validate and pay for paymaster transaction", async function () {
-    await executeTransaction(
-      userWallet,
-      erc20.address,
-      "ApprovalBased"
-    );
+    await executeTransaction(userWallet, erc20.address, "ApprovalBased");
     const newBalance = await userWallet.getBalance();
     const newBalance_ERC20 = await erc20.balanceOf(userWallet.address);
     expect(newBalance).to.be.eql(initialBalance);
@@ -159,11 +161,7 @@ describe("ERC20Paymaster", function () {
     await fundAccount(whale, userWallet.address, "13");
     await erc20.approve(paymaster.address, ethers.BigNumber.from(0));
     try {
-      await executeTransaction(
-        userWallet,
-        erc20.address,
-        "ApprovalBased"
-      );
+      await executeTransaction(userWallet, erc20.address, "ApprovalBased");
     } catch (e) {
       expect(e.message).to.include("Min allowance too low");
     }

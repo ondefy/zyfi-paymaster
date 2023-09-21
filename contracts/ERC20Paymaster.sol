@@ -7,11 +7,14 @@ import {IPaymaster, ExecutionResult, PAYMASTER_VALIDATION_SUCCESS_MAGIC} from "@
 import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymasterFlow.sol";
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./SignatureCheck.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 import "hardhat/console.sol";
 
 contract Paymaster is IPaymaster, Ownable {
+    using SignatureCheck for *;
+
     modifier onlyBootloader() {
         require(
             msg.sender == BOOTLOADER_FORMAL_ADDRESS,
@@ -46,14 +49,25 @@ contract Paymaster is IPaymaster, Ownable {
         if (paymasterInputSelector == IPaymasterFlow.approvalBased.selector) {
             // While the transaction data consists of address, uint256 and bytes data,
             // the data is not needed for this paymaster
-            (address token, uint256 amount, bytes memory data) = abi.decode(
-                _transaction.paymasterInput[4:],
-                (address, uint256, bytes)
-            );
+            (
+                address token,
+                uint256 amount,
+                address user,
+                uint256 expiration
+            ) = abi.decode(
+                    _transaction.paymasterInput[4:],
+                    (address, uint256, address, uint256)
+                );
+            // // Unwrap the data
+            (address user, uint256 expiration,) = abi.decode(
+                data,(address, uint256);
+            console.log("tx.orign", tx.origin);
+            console.log("User", user);
+            console.log("Expiration", expiration);
 
             //Validate that the message was signed by the Ondefy backend
             //TODO
-            console.log("Data: ", data);
+
             // We verify that the user has provided enough allowance
             address userAddress = address(uint160(_transaction.from));
 
@@ -113,6 +127,42 @@ contract Paymaster is IPaymaster, Ownable {
 
     function withdrawETH() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function recoverSigner(
+        bytes32 messageHash,
+        bytes memory signature,
+        address _from,
+        address _token,
+        uint256 _amount,
+        uint256 _expiration
+    ) public pure returns (address) {
+        bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
+            messageHash
+        );
+
+        // Ensure that the message was signed by `_from`
+        return ECDSA.recover(ethSignedMessageHash, signature);
+    }
+
+    function isValidSignature(
+        bytes32 messageHash,
+        bytes memory signature,
+        address _from,
+        address _token,
+        uint256 _amount,
+        uint256 _expiration
+    ) public pure returns (bool) {
+        return
+            _from ==
+            recoverSigner(
+                messageHash,
+                signature,
+                _from,
+                _token,
+                _amount,
+                _expiration
+            );
     }
 
     receive() external payable {}
