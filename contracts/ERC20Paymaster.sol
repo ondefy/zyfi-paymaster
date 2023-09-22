@@ -53,8 +53,12 @@ contract Paymaster is IPaymaster, Ownable {
                 _transaction.paymasterInput[4:],
                 (address, uint256, bytes)
             );
+
             // Unwrap the data
-            (uint256 expiration, address user) = abi.decode(data, (uint256, address));
+            (uint256 expiration, bytes memory signedMessage) = abi.decode(
+                data,
+                (uint256, bytes)
+            );
             address from = address(uint160(_transaction.from));
 
             console.log("token", token);
@@ -62,7 +66,7 @@ contract Paymaster is IPaymaster, Ownable {
             // console.log("tx.origin", tx.origin);
             // console.logBytes(signedMessage);
             console.log("Tx user", from);
-            console.log("User", user);
+            // console.log("User", user);
             console.log("Expiration", expiration);
 
             //Validate that the message was signed by the Ondefy backend

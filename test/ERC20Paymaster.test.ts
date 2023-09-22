@@ -89,7 +89,7 @@ describe("ERC20Paymaster", function () {
     //   [ "bytes","address", "uint256"],
     //   [SignedMessageHash, user.address, expiration]
     // );
-    const innerInput = ethers.utils.solidityPack(["uint256", "address"], [expiration, user.address]);
+    const innerInput = ethers.utils.solidityPack(["uint256", "bytes"], [expiration, SignedMessageHash]);
     console.log("Inner input: ", innerInput);
 
     const paymasterParams = utils.getPaymasterParams(
@@ -98,7 +98,7 @@ describe("ERC20Paymaster", function () {
         type: payType,
         token: token,
         minimalAllowance,
-        innerInput,
+        innerInput: innerInput,
       }
     );
 
