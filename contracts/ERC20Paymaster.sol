@@ -49,20 +49,20 @@ contract Paymaster is IPaymaster, Ownable {
         if (paymasterInputSelector == IPaymasterFlow.approvalBased.selector) {
             // While the transaction data consists of address, uint256 and bytes data,
             // the data is not needed for this paymaster
-            (address token, uint256 amount, uint256 expiration) = abi.decode(
+            (address token, uint256 amount, bytes memory data) = abi.decode(
                 _transaction.paymasterInput[4:],
-                (address, uint256, uint256)
+                (address, uint256, bytes)
             );
-            // // Unwrap the data
-            // (address user, uint256 expiration,) = abi.decode(
-            //     data,(address, uint256)
+            // Unwrap the data
+            (uint256 expiration, address user) = abi.decode(data, (uint256, address));
             address from = address(uint160(_transaction.from));
 
             console.log("token", token);
-            console.log("amount", amount);
+            console.log("Allowance", amount);
             // console.log("tx.origin", tx.origin);
             // console.logBytes(signedMessage);
             console.log("Tx user", from);
+            console.log("User", user);
             console.log("Expiration", expiration);
 
             //Validate that the message was signed by the Ondefy backend
