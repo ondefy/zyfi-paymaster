@@ -49,20 +49,20 @@ contract Paymaster is IPaymaster, Ownable {
         if (paymasterInputSelector == IPaymasterFlow.approvalBased.selector) {
             // While the transaction data consists of address, uint256 and bytes data,
             // the data is not needed for this paymaster
-            (
-                address token,
-                uint256 amount,
-                address user,
-                uint256 expiration
-            ) = abi.decode(
-                    _transaction.paymasterInput[4:],
-                    (address, uint256, address, uint256)
-                );
+            (address token, uint256 amount, uint256 expiration) = abi.decode(
+                _transaction.paymasterInput[4:],
+                (address, uint256, uint256)
+            );
             // // Unwrap the data
-            (address user, uint256 expiration,) = abi.decode(
-                data,(address, uint256);
-            console.log("tx.orign", tx.origin);
-            console.log("User", user);
+            // (address user, uint256 expiration,) = abi.decode(
+            //     data,(address, uint256)
+            address from = address(uint160(_transaction.from));
+
+            console.log("token", token);
+            console.log("amount", amount);
+            // console.log("tx.origin", tx.origin);
+            // console.logBytes(signedMessage);
+            console.log("Tx user", from);
             console.log("Expiration", expiration);
 
             //Validate that the message was signed by the Ondefy backend
@@ -125,8 +125,11 @@ contract Paymaster is IPaymaster, Ownable {
         token.transfer(msg.sender, token.balanceOf(address(this)));
     }
 
-    function withdrawETH() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    function withdraw(address payable _to) external onlyOwner {
+        // send paymaster funds to the owner
+        uint256 balance = address(this).balance;
+        (bool success, ) = _to.call{value: balance}("");
+        require(success, "Failed to withdraw funds from paymaster.");
     }
 
     function recoverSigner(

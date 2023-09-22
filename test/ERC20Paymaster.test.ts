@@ -66,7 +66,9 @@ describe("ERC20Paymaster", function () {
 
     const gasPrice = await provider.getGasPrice();
     const minimalAllowance = ethers.BigNumber.from(1);
-    const expiration = ethers.BigNumber.from((await helper.getTimestamp()).add(TX_EXPIRATION));
+    const expiration = ethers.BigNumber.from(
+      (await helper.getTimestamp()).add(TX_EXPIRATION)
+    );
 
     const messageHash = await getMessageHash(
       user.address,
@@ -75,18 +77,19 @@ describe("ERC20Paymaster", function () {
       expiration
     );
 
-    const SignedMessageHash: any = signer.signMessage(messageHash);
+    const SignedMessageHash = await signer.signMessage(messageHash);
     console.log("Message hash: ", messageHash.toString());
+    console.log("Signed message hash: ", SignedMessageHash.toString());
     console.log("User address: ", user.address.toString());
     console.log("ERC20 address: ", token.toString());
     console.log("Minimal allowance: ", minimalAllowance.toString());
     console.log("Expiration: ", expiration.toString());
 
-    const innerInput = ethers.utils.solidityPack(
-      ["address", "uint256"],
-      [user.address, expiration]
-    );
-    console.log("Expiration: ", expiration.toString());
+    // const innerInput = ethers.utils.solidityPack(
+    //   [ "bytes","address", "uint256"],
+    //   [SignedMessageHash, user.address, expiration]
+    // );
+    const innerInput = ethers.utils.solidityPack(["uint256"], [expiration]);
     console.log("Inner input: ", innerInput);
 
     const paymasterParams = utils.getPaymasterParams(
@@ -130,7 +133,7 @@ describe("ERC20Paymaster", function () {
     );
   }
 
-  it.only("Happy path: should validate and pay for paymaster transaction", async function () {
+  it.only("Should validate and pay for paymaster transaction", async function () {
     await executeTransaction(userWallet, erc20.address, "ApprovalBased");
     const newBalance = await userWallet.getBalance();
     const newBalance_ERC20 = await erc20.balanceOf(userWallet.address);

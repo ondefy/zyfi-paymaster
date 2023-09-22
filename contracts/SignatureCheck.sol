@@ -14,8 +14,10 @@ library SignatureCheck {
         bytes memory signature
     ) internal pure returns (bool) {
         // Construct the message hash
-        bytes32 messageHash = keccak256(abi.encodePacked(_from, _token, _amount, _expiration));
-        
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(_from, _token, _amount, _expiration)
+        );
+
         // Convert the message hash into an Ethereum signed message
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
 
