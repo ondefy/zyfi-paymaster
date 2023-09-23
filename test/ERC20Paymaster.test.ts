@@ -98,7 +98,7 @@ describe("ERC20Paymaster", function () {
         type: payType,
         token: token,
         minimalAllowance,
-        innerInput: innerInput,
+        innerInput: SignedMessageHash,
       }
     );
 
