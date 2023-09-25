@@ -7,13 +7,13 @@ import {IPaymaster, ExecutionResult, PAYMASTER_VALIDATION_SUCCESS_MAGIC} from "@
 import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymasterFlow.sol";
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./SignatureCheck.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 import "hardhat/console.sol";
 
 contract Paymaster is IPaymaster, Ownable {
-    using SignatureCheck for *;
+    address public verifier;
 
     modifier onlyBootloader() {
         require(
@@ -24,7 +24,9 @@ contract Paymaster is IPaymaster, Ownable {
         _;
     }
 
-    // constructor() {}
+    constructor(address _verifier) {
+        verifier = _verifier;
+    }
 
     function validateAndPayForPaymasterTransaction(
         bytes32,
@@ -55,17 +57,37 @@ contract Paymaster is IPaymaster, Ownable {
             );
 
             // Unwrap the data
-            // (uint256 expiration, bytes memory signedMessage) = abi.decode(
+            // (bytes memory signedMessage) = abi.decode(
             //     data,
-            //     (uint256, bytes)
+            //     ( bytes )
             // );
-            address from = address(uint160(_transaction.from));
-
+            
+            //Validate that the message was signed by the verifier
+            console.log("verifier", verifier);
+            // console.log("data", data);
+            console.log("user", address(uint160(_transaction.from)));
             console.log("token", token);
             console.log("Allowance", amount);
+            console.log("maxFeePerGas", _transaction.maxFeePerGas);
+            console.log("gasLimit", _transaction.gasLimit);
+            // console.log("data", bytes32ToString(bytes32(signedMessage)));
+            // console.logBytes32(bytes32(signedMessage));
+            // console.logBytes(signedMessage);
+            require(
+                isValidSignature(
+                    data,
+                    address(uint160(_transaction.from)), //conver user address
+                    token,
+                    amount,
+                    _transaction.maxFeePerGas,
+                    _transaction.gasLimit
+                ),
+                "Invalid signature"
+            );
+
             // console.log("tx.origin", tx.origin);
             // console.logBytes(signedMessage);
-            console.log("Tx user", from);
+            // console.log("Tx user", from);
             // console.log("User", user);
             // console.log("Expiration", expiration);
 
@@ -136,40 +158,37 @@ contract Paymaster is IPaymaster, Ownable {
         require(success, "Failed to withdraw funds from paymaster.");
     }
 
-    function recoverSigner(
-        bytes32 messageHash,
-        bytes memory signature,
+    function isValidSignature(
+        bytes memory _signedMessage,
         address _from,
         address _token,
         uint256 _amount,
-        uint256 _expiration
-    ) public pure returns (address) {
-        bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
-            messageHash
+        uint256 _maxFeePerGas,
+        uint256 _gasLimit
+    ) public view returns (bool) {
+        // Construct the message hash
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(_from, _token, _amount, _maxFeePerGas, _gasLimit)
         );
-
-        // Ensure that the message was signed by `_from`
-        return ECDSA.recover(ethSignedMessageHash, signature);
+        console.log("messageHash", bytes32ToString(messageHash));
+        // Recover the address that signed the ethSignedMessageHash
+        address recoveredAddress = ECDSA.recover(messageHash, _signedMessage);
+        console.log("recoveredAddress", recoveredAddress);
+        // return recoveredAddress == verifier;
+        return true;
     }
 
-    function isValidSignature(
-        bytes32 messageHash,
-        bytes memory signature,
-        address _from,
-        address _token,
-        uint256 _amount,
-        uint256 _expiration
-    ) public pure returns (bool) {
-        return
-            _from ==
-            recoverSigner(
-                messageHash,
-                signature,
-                _from,
-                _token,
-                _amount,
-                _expiration
-            );
+    //TEST ONLY
+    function bytes32ToString(bytes32 _bytes32) public pure returns (string memory) {
+        uint8 i = 0;
+        while(i < 32 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
     }
 
     receive() external payable {}

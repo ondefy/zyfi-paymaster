@@ -13,9 +13,11 @@ dotenv.config();
 
 const Whale =
   "0x850683b40d4a740aa6e745f889a6fdc8327be76e122f5aba645a5b02d0248db8";
-const Signer_PK =
+
+  // puublic address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
+const Verifier_PK =
   "0x8f6e509395c13960f501bc7083450ffd0948bc94103433d5843e5060a91756da";
-const Signer = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
+
 
 const GAS_LIMIT = 6_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minutes
@@ -25,7 +27,7 @@ describe("ERC20Paymaster", function () {
   let whale: Wallet;
   let deployer: Deployer;
   let userWallet: Wallet;
-  let signer: Wallet;
+  let verifier: Wallet;
   let initialBalance: ethers.BigNumber;
   let initialBalance_ERC20: ethers.BigNumber;
   let paymaster: Contract;
@@ -36,7 +38,7 @@ describe("ERC20Paymaster", function () {
     provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url);
     whale = new Wallet(Whale, provider);
     deployer = new Deployer(hre, whale);
-    signer = new Wallet(Signer_PK, provider);
+    verifier = new Wallet(Verifier_PK, provider);
     userWallet = Wallet.createRandom();
     userWallet = new Wallet(userWallet.privateKey, provider);
     // console.log("Private key: ", userWallet.privateKey);
@@ -50,7 +52,7 @@ describe("ERC20Paymaster", function () {
     ]);
     helper = await deployContract(deployer, "TestHelper", []);
 
-    paymaster = await deployContract(deployer, "Paymaster", []);
+    paymaster = await deployContract(deployer, "Paymaster", [verifier.address]);
 
     await fundAccount(whale, paymaster.address, "13");
     await (await erc20.mint(userWallet.address, 130)).wait();
@@ -74,22 +76,25 @@ describe("ERC20Paymaster", function () {
       user.address,
       token,
       minimalAllowance,
-      expiration
+      gasPrice,
+      ethers.BigNumber.from(GAS_LIMIT),
     );
 
-    const SignedMessageHash = await signer.signMessage(messageHash);
+    const SignedMessageHash = await verifier.signMessage(messageHash);
     console.log("Message hash: ", messageHash.toString());
     console.log("Signed message hash: ", SignedMessageHash.toString());
     console.log("User address: ", user.address.toString());
     console.log("ERC20 address: ", token.toString());
     console.log("Minimal allowance: ", minimalAllowance.toString());
-    console.log("Expiration: ", expiration.toString());
+    // console.log("Expiration: ", expiration.toString());
+    console.log("Max fee per gas: ", gasPrice.toString);
+    console.log("Gas limit: ", GAS_LIMIT.toString());
 
     // const innerInput = ethers.utils.solidityPack(
     //   [ "bytes","address", "uint256"],
     //   [SignedMessageHash, user.address, expiration]
     // );
-    const innerInput = ethers.utils.solidityPack(["uint256", "bytes"], [expiration, SignedMessageHash]);
+    const innerInput = ethers.utils.solidityPack(["bytes"], [ SignedMessageHash]);
     console.log("Inner input: ", innerInput);
 
     const paymasterParams = utils.getPaymasterParams(
@@ -123,15 +128,20 @@ describe("ERC20Paymaster", function () {
     _from: Address,
     _token: Address,
     _amount: ethers.BigNumber,
-    _expiration: ethers.BigNumber
+    _maxFeePerGas: ethers.BigNumber,
+    _gasLimit: ethers.BigNumber
   ) {
     return ethers.utils.keccak256(
       ethers.utils.solidityPack(
-        ["address", "address", "uint256", "uint256"],
-        [_from, _token, _amount, _expiration]
+        ["address", "address", "uint256", "uint256", "uint256"],
+        [_from, _token, _amount, _maxFeePerGas, _gasLimit]
       )
     );
   }
+
+  it.only("Initial parameters are correctly set", async function () {
+    expect(await paymaster.verifier()).to.be.eql(verifier.address);
+  });
 
   it.only("Should validate and pay for paymaster transaction", async function () {
     await executeTransaction(userWallet, erc20.address, "ApprovalBased");
