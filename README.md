@@ -1,4 +1,4 @@
-# zkSync Hardhat project
+# Zyfi Paymaster
 
 This project was scaffolded with [zksync-cli](https://github.com/matter-labs/zksync-cli).
 
@@ -12,9 +12,8 @@ This project was scaffolded with [zksync-cli](https://github.com/matter-labs/zks
 ## Commands
 
 - `yarn hardhat compile` will compile the contracts.
-- `yarn run deploy` will execute the deployment script `/deploy/deploy-greeter.ts`. Requires [environment variable setup](#environment-variables).
-- `yarn run greet` will execute the script `/deploy/use-greeter.ts` which interacts with the Greeter contract deployed.
-- `yarn test`: run tests. **Check test requirements below.**
+- `yarn local-node` will run the in-memory node
+- `yarn test` will run tests. **Check test requirements below.**
 
 Both `yarn run deploy` and `yarn run greet` are configured in the `package.json` file and run `yarn hardhat deploy-zksync`.
 
@@ -42,8 +41,9 @@ Rust should install it in the ~/.cargo/bin directory.
 To start the node, execute:
 
 ```
-era_test_node run
-``` 
+yarn local-node
+```
+
 P
 lease check [this section of the docs](https://v2-docs.zksync.io/api/hardhat/testing.html#prerequisites) which contains all the details.
 
