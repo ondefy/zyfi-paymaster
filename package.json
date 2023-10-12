@@ -1,5 +1,5 @@
 {
-  "name": "ondefy-paymaster",
+  "name": "zyfi-paymaster",
   "version": "1.0.0",
   "main": "index.js",
   "author": "lutr0 - Ondefy",
@@ -16,6 +16,7 @@
     "@openzeppelin/contracts": "^4.9.3",
     "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.1",
+    "axios": "^1.5.1",
     "chai": "^4.3.8",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",

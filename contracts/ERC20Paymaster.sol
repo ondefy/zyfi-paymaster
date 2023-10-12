@@ -61,10 +61,12 @@ contract Paymaster is IPaymaster, Ownable {
                 );
 
             //Validate that the message was signed by the Zyfi api
+            console.log("Tx to", address(uint160(_transaction.to)));
             require(
                 isValidSignature(
                     signedMessage,
                     address(uint160(_transaction.from)), //conver user address
+                    address(uint160(_transaction.to)),
                     token,
                     amount,
                     _transaction.maxFeePerGas,
@@ -140,13 +142,21 @@ contract Paymaster is IPaymaster, Ownable {
     function isValidSignature(
         bytes memory _signature,
         address _from,
+        address _to,
         address _token,
         uint256 _amount,
         uint256 _maxFeePerGas,
         uint256 _gasLimit
     ) public view returns (bool) {
         bytes32 messageHash = keccak256(
-            abi.encodePacked(_from, _token, _amount, _maxFeePerGas, _gasLimit)
+            abi.encodePacked(
+                _from,
+                _to,
+                _token,
+                _amount,
+                _maxFeePerGas,
+                _gasLimit
+            )
         );
         bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
             messageHash
