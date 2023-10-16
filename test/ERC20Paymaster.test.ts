@@ -24,6 +24,7 @@ const TX_EXPIRATION = 30 * 60; //30 minutes
 
 describe("ERC20Paymaster", function () {
   let provider: Provider;
+  let admin: Wallet;
   let whale: Wallet;
   let deployer: Deployer;
   let userWallet: Wallet;
@@ -37,9 +38,12 @@ describe("ERC20Paymaster", function () {
   before(async function () {
     provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url);
     whale = new Wallet(Whale, provider);
+    admin =  Wallet.createRandom();
     deployer = new Deployer(hre, whale);
     verifier = new Wallet(Verifier_PK, provider);
     userWallet = Wallet.createRandom();
+    console.log("Admin address: ", admin.address);
+    console.log("Verifier address: ", verifier.address);
     console.log("User address: ", userWallet.address);
     userWallet = new Wallet(userWallet.privateKey, provider);
     initialBalance = await userWallet.getBalance();
@@ -52,7 +56,12 @@ describe("ERC20Paymaster", function () {
     helper = await deployContract(deployer, "TestHelper", []);
     console.log("ERC20 address: ", erc20.address);
 
-    paymaster = await deployContract(deployer, "Paymaster", [verifier.address]);
+    console.log("Deploying Paymaster...");
+    const contract = await deployer.loadArtifact("Paymaster");
+    paymaster = await hre.zkUpgrades.deployProxy(deployer.zkWallet, contract, [ verifier.address], { initializer: "initialize" });
+
+    await paymaster.deployed();
+    // paymaster = await deployContract(deployer, "Paymaster", [verifier.address]);
     console.log("Paymaster address: ", paymaster.address);
 
     await fundAccount(whale, paymaster.address, "13");
@@ -172,6 +181,9 @@ describe("ERC20Paymaster", function () {
       expect(e.message).to.include("Min allowance too low");
     }
   });
+
+  it("Successfullly withdraw funds from paymaster", async function () {
+    
 
   it.skip("Should call succesfully zyfi-api", async function () {
     const mintAmount = BigNumber.from(10);

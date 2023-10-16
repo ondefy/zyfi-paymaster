@@ -24,13 +24,19 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPaymaster, ExecutionResult, PAYMASTER_VALIDATION_SUCCESS_MAGIC} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymaster.sol";
 import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymasterFlow.sol";
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 
-contract Paymaster is IPaymaster, Ownable, UUPSUpgradeable {
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+contract Paymaster is
+    IPaymaster,
+    Initializable,
+    UUPSUpgradeable,
+    OwnableUpgradeable
+{
     using ECDSA for bytes32;
 
     // Public address of the Zyfi signer
@@ -47,8 +53,12 @@ contract Paymaster is IPaymaster, Ownable, UUPSUpgradeable {
         _;
     }
 
-    constructor(address _verifier) {
+    // --- Initializer ---
+    function initialize(address _verifier) public initializer {
         verifier = _verifier;
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        emit VerifierChanged(_verifier);
     }
 
     function validateAndPayForPaymasterTransaction(
@@ -183,17 +193,25 @@ contract Paymaster is IPaymaster, Ownable, UUPSUpgradeable {
                 _gasLimit
             )
         );
+        // bytes32 ethSignedMessageHash = messageHash;
+
         bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
             messageHash
         );
 
-        (address recoveredAddress, ECDSA.RecoverError error2) = ECDSA
+        (address recoveredAddress, ECDSA.RecoverError error2 ) = ECDSA
             .tryRecover(ethSignedMessageHash, _signature);
         if (error2 != ECDSA.RecoverError.NoError) {
             return false;
         }
         return recoveredAddress == verifier;
     }
+
+    function authorizeUpgrade(address newImplementation) public {
+        _authorizeUpgrade(newImplementation);
+    }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     receive() external payable {}
 }
