@@ -1,24 +1,22 @@
 // SPDX-License-Identifier: MIT
-                                                                       
-                                                                                                    
-                                                                                                    
-//       @@@@%%%%%%%@@@                                                                                
-//     @@@%%%%%%%%%%%%@@@                                           @@@  @@                            
-//   @@%%%%%%%%%%%%%%%%%%@@          @%%%%%%%%%%@@               @@@%%@@%%@@                           
-//  @@%%%%%%%@@  @%%%%%%%%@@                  @%@@               @%@     @@                            
-// @@%%%%%%@@@    @@%%%%%%%@@               @@%@@                @%@                                   
-// @%%%%%@@@        @@%%%%%%@              @@@@   @%@@       @@%%@%@%%@@@%@@                           
-// @%%%%@@            @%%%%%@             @@@@     @@@@     @@%@@@%@@@@ @%@@                           
-// @%%%%%%%%%@@    @%%%%%%%%@            @@@@      @@%@     @%@@ @%@    @%@@                           
-// @@%%%%%%%%%%@   @%%%%%%%%@           @@@@        @@@@   @@@@  @%@    @%@@                           
-//  @%%%%%%%@@%%@@ @%%%%%%%@@          @@@@          @@@@ @@@@   @%@    @%@@                           
-//  @@%%%%%%@@@%@@@@%%%%%%@@          @@@@            @@@@@@@    @%@    @%@@                           
-//    @%%%%%@ @@%%%@%%%%%@           @%@@@@@@@@@@@     @%%%@     @%@    @%@@                           
-//     @@@@%@   @@%%%@@@@           @@@@@@@@@@@@@@     @@@@      @@@    @@@@                           
-//        @@@    @@@@@                                 @@@@                                            
-//                                                    @@@@                                             
-//                                                   @@%@ 
-                                                                                                                                          
+
+//        @@@@%%%%%%%@@@
+//      @@@%%%%%%%%%%%%@@@             @%%%%%%%%%%@@                 @@@  @@
+//    @@%%%%%%%%%%%%%%%%%%@@          @%%%%%%%%%%@@               @@@%%@@%%@@
+//   @@%%%%%%%@@  @%%%%%%%%@@                  @%@@               @%@     @@
+//  @@%%%%%%@@@    @@%%%%%%%@@               @@%@@                @%@
+//  @%%%%%@@@        @@%%%%%%@              @@@@   @%@@       @@%%@%@%%@@@%@@
+//  @%%%%@@            @%%%%%@             @@@@     @@@@     @@%@@@%@@@@ @%@@
+//  @%%%%%%%%%@@    @%%%%%%%%@            @@@@      @@%@     @%@@ @%@    @%@@
+//  @@%%%%%%%%%%@   @%%%%%%%%@           @@@@        @@@@   @@@@  @%@    @%@@
+//   @%%%%%%%@@%%@@ @%%%%%%%@@          @@@@          @@@@ @@@@   @%@    @%@@
+//   @@%%%%%%@@@%@@@@%%%%%%@@          @@@@            @@@@@@@    @%@    @%@@
+//     @%%%%%@ @@%%%@%%%%%@           @%@@@@@@@@@@@     @%%%@     @%@    @%@@
+//      @@@@%@   @@%%%@@@@           @@@@@@@@@@@@@@     @@@@      @@@    @@@@
+//         @@@    @@@@@                                 @@@@
+//                                                     @@@@
+//                                                    @@%@
+
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -28,10 +26,11 @@ import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/i
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 
-contract Paymaster is IPaymaster, Ownable {
+contract Paymaster is IPaymaster, Ownable, UUPSUpgradeable {
     using ECDSA for bytes32;
 
     // Public address of the Zyfi signer
