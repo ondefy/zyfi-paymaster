@@ -10,13 +10,14 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
-import "hardhat/console.sol";
 
 contract Paymaster is IPaymaster, Ownable {
     using ECDSA for bytes32;
 
     // Public address of the Zyfi signer
     address public verifier;
+
+    event VerifierChanged(address indexed newVerifier);
 
     modifier onlyBootloader() {
         require(
@@ -61,9 +62,8 @@ contract Paymaster is IPaymaster, Ownable {
                 );
 
             //Validate that the message was signed by the Zyfi api
-            console.log("Tx to", address(uint160(_transaction.to)));
             require(
-                isValidSignature(
+                _isValidSignature(
                     signedMessage,
                     address(uint160(_transaction.from)), //conver user address
                     address(uint160(_transaction.to)),
@@ -127,6 +127,12 @@ contract Paymaster is IPaymaster, Ownable {
         // Refunds are not supported yet.
     }
 
+    //Changes the verifier address
+    function setVerifier(address _newVerifier) external onlyOwner {
+        verifier = _newVerifier;
+        emit VerifierChanged(_newVerifier);
+    }
+
     function withdrawERC20(address _ERC20) external onlyOwner {
         IERC20 token = IERC20(_ERC20);
         token.transfer(msg.sender, token.balanceOf(address(this)));
@@ -139,7 +145,7 @@ contract Paymaster is IPaymaster, Ownable {
         require(success, "Failed to withdraw funds from paymaster.");
     }
 
-    function isValidSignature(
+    function _isValidSignature(
         bytes memory _signature,
         address _from,
         address _to,
@@ -147,7 +153,7 @@ contract Paymaster is IPaymaster, Ownable {
         uint256 _amount,
         uint256 _maxFeePerGas,
         uint256 _gasLimit
-    ) public view returns (bool) {
+    ) internal view returns (bool) {
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 _from,

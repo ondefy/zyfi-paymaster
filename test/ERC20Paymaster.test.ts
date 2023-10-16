@@ -173,7 +173,7 @@ describe("ERC20Paymaster", function () {
     }
   });
 
-  it.only("Should call succesfully zyfi-api", async function () {
+  it.skip("Should call succesfully zyfi-api", async function () {
     const mintAmount = BigNumber.from(10);
     const txData = erc20.interface.encodeFunctionData("mint", [
       userWallet.address,
@@ -199,30 +199,27 @@ describe("ERC20Paymaster", function () {
       data: data,
     };
 
-    let response;
-    try {
-      response = await axios.request(config);
-      // console.log("Response status:", response.status);
-      // console.log(JSON.stringify(response.data));
-      let rawTx = response.data.txData;
-      console.log("Raw Transaction:", rawTx);
-      await (
-        await erc20.connect(userWallet).mint(userWallet, mintAmount, {
-          maxFeePerGas: BigNumber.from(rawTx.maxFeePerGas),
-          maxPriorityFeePerGas: BigNumber.from(rawTx.maxPriorityFeePerGas),
-          gasLimit: rawTx.gasLimit,
-          customData: {
-            paymasterParams: {
-              paymaster: paymaster.address,
-              paymasterInput: rawTx.paymasterParams.paymasterInput,
-            },
-            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          },
-        })
-      ).wait();
-    } catch (error) {
-      console.log(error);
-    }
+    let response = await axios.request(config);
+    // console.log("Response status:", response.status);
+    // console.log(JSON.stringify(response.data));
+    let rawTx = response.data.txData;
+    console.log("Raw Transaction:", rawTx);
+    // const successfulTx = await (
+    //   await erc20.connect(userWallet).mint(userWallet, mintAmount, {
+    //     maxFeePerGas: BigNumber.from(rawTx.maxFeePerGas),
+    //     maxPriorityFeePerGas: BigNumber.from(rawTx.maxPriorityFeePerGas),
+    //     gasLimit: rawTx.gasLimit,
+    //     customData: {
+    //       paymasterParams: {
+    //         paymaster: paymaster.address,
+    //         paymasterInput: rawTx.paymasterParams.paymasterInput,
+    //       },
+    //       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+    //     },
+    //   })
+    // ).wait();
+    // expect(successfulTx.status).to.be.eql(1);
+
     const newBalance = await userWallet.getBalance();
     const newBalance_ERC20 = await erc20.balanceOf(userWallet.address);
     console.log("New Balance ERC20:", newBalance_ERC20.toString());
