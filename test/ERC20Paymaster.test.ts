@@ -27,7 +27,7 @@ describe("ERC20Paymaster", function () {
   let admin: Wallet;
   let whale: Wallet;
   let deployer: Deployer;
-  let userWallet: Wallet;
+  let user: Wallet;
   let verifier: Wallet;
   let initialBalance: BigNumber;
   let initialBalance_ERC20: BigNumber;
@@ -38,15 +38,16 @@ describe("ERC20Paymaster", function () {
   before(async function () {
     provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url);
     whale = new Wallet(Whale, provider);
-    admin =  Wallet.createRandom();
+    admin = Wallet.createRandom();
+    admin = new Wallet(admin.privateKey, provider);
     deployer = new Deployer(hre, whale);
     verifier = new Wallet(Verifier_PK, provider);
-    userWallet = Wallet.createRandom();
+    user = Wallet.createRandom();
+    user = new Wallet(user.privateKey, provider);
     console.log("Admin address: ", admin.address);
     console.log("Verifier address: ", verifier.address);
-    console.log("User address: ", userWallet.address);
-    userWallet = new Wallet(userWallet.privateKey, provider);
-    initialBalance = await userWallet.getBalance();
+    console.log("User address: ", user.address);
+    initialBalance = await user.getBalance();
 
     erc20 = await deployContract(deployer, "MockERC20", [
       "TestToken",
@@ -61,12 +62,14 @@ describe("ERC20Paymaster", function () {
     paymaster = await hre.zkUpgrades.deployProxy(deployer.zkWallet, contract, [ verifier.address], { initializer: "initialize" });
 
     await paymaster.deployed();
+    await paymaster.transferOwnership(admin.address);
     // paymaster = await deployContract(deployer, "Paymaster", [verifier.address]);
     console.log("Paymaster address: ", paymaster.address);
 
-    await fundAccount(whale, paymaster.address, "13");
-    await (await erc20.mint(userWallet.address, 130)).wait();
-    initialBalance_ERC20 = await erc20.balanceOf(userWallet.address);
+    await fundAccount(whale, paymaster.address, "14");
+    await fundAccount(whale, admin.address, "14");
+    await (await erc20.mint(user.address, 130)).wait();
+    initialBalance_ERC20 = await erc20.balanceOf(user.address);
   });
 
   async function executeTransaction(
@@ -95,15 +98,6 @@ describe("ERC20Paymaster", function () {
       ethers.utils.arrayify(messageHash)
     );
     const innerInput = ethers.utils.arrayify(SignedMessageHash);
-    // console.log("Message hash: ", messageHash.toString());
-    // console.log("Signed message hash: ", SignedMessageHash.toString());
-    // console.log("User address: ", user.address.toString());
-    // console.log("ERC20 address: ", token.toString());
-    // console.log("Minimal allowance: ", minimalAllowance.toString());
-    // console.log("Expiration: ", expiration.toString());
-    // console.log("Max fee per gas: ", gasPrice.toString);
-    // console.log("Gas limit: ", GAS_LIMIT.toString());
-    // console.log("Inner input: ", innerInput);
 
     const paymasterParams = utils.getPaymasterParams(
       paymaster.address.toString(),
@@ -115,10 +109,8 @@ describe("ERC20Paymaster", function () {
       }
     );
 
-    // console.log("Paymaster params: ", paymasterParams);
-
     await (
-      await erc20.connect(userWallet).mint(user.address, 5, {
+      await erc20.connect(user).mint(user.address, 5, {
         maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: gasPrice,
         gasLimit: GAS_LIMIT,
@@ -146,55 +138,90 @@ describe("ERC20Paymaster", function () {
 
   it("Initial parameters are correctly set", async function () {
     const verifierAddress = await paymaster.verifier();
+    const ownerAddress = await paymaster.owner();
     expect(verifierAddress).to.be.eql(verifier.address);
+    expect(ownerAddress).to.be.eql(admin.address);
   });
 
   it("Should validate and pay for paymaster transaction", async function () {
-    await executeTransaction(userWallet, erc20.address, "ApprovalBased");
-    const newBalance = await userWallet.getBalance();
-    const newBalance_ERC20 = await erc20.balanceOf(userWallet.address);
+    await executeTransaction(user, erc20.address, "ApprovalBased");
+    const newBalance = await user.getBalance();
+    const newBalance_ERC20 = await erc20.balanceOf(user.address);
     expect(newBalance).to.be.eql(initialBalance);
     expect(newBalance_ERC20).to.be.eql(initialBalance_ERC20.add(4)); //5 minted - 1 fee
     expect(
-      await erc20.allowance(userWallet.address, paymaster.address)
+      await erc20.allowance(user.address, paymaster.address)
     ).to.be.eql(BigNumber.from(0));
   });
 
   it("Should not validate a wrong signature", async function () {
     await expect(
-      executeTransaction(userWallet, erc20.address, "ApprovalBased", false)
+      executeTransaction(user, erc20.address, "ApprovalBased", false)
     ).to.be.rejectedWith("Invalid signature");
   });
 
   it("should revert if unsupported paymaster flow", async function () {
     await expect(
-      executeTransaction(userWallet, erc20.address, "General")
+      executeTransaction(user, erc20.address, "General")
     ).to.be.rejectedWith("Unsupported paymaster flow");
   });
 
   it("should revert if allowance is too low", async function () {
-    await fundAccount(whale, userWallet.address, "13");
+    await fundAccount(whale, user.address, "13");
     await erc20.approve(paymaster.address, BigNumber.from(0));
     try {
-      await executeTransaction(userWallet, erc20.address, "ApprovalBased");
+      await executeTransaction(user, erc20.address, "ApprovalBased");
     } catch (e) {
       expect(e.message).to.include("Min allowance too low");
     }
   });
 
-  it("Successfullly withdraw funds from paymaster", async function () {
-    
+  it("Succesfully change verifier", async function () {
+    const newVerifier = Wallet.createRandom();
+    await paymaster.connect(admin).changeVerifier(newVerifier.address);
+    expect(await paymaster.verifier()).to.be.eql(newVerifier.address);
+  });
+
+  it("Should allow the owner to withdraw ERC20", async function() {
+    await erc20.mint(paymaster.address, 100);
+    expect(await erc20.balanceOf(paymaster.address)).to.equal(100);
+
+
+    await (await paymaster.connect(admin).withdrawERC20(erc20.address)).wait();
+
+    expect(await erc20.balanceOf(admin.address)).to.equal(100);
+  });
+
+  it("Should allow the owner to withdraw ETH", async function() {
+    const paymasterBalance = await provider.getBalance(paymaster.address);
+    const adminBalance = await provider.getBalance(admin.address);
+
+
+    await (await paymaster.connect(admin).withdraw(admin.address)).wait();
+    expect(await provider.getBalance(paymaster.address)).to.be.eql(BigNumber.from(0));
+  });
+  it("Should fail when trying to transfer ERC20 tokens from an unauthorized address", async function () {
+    await expect(
+      paymaster.connect(user).withdrawERC20(erc20.address)
+    ).to.be.rejectedWith("Ownable: caller is not the owner");
+  });
+
+  it("Should fail to withdraw ETH if not owner", async function () {
+    await expect(
+      paymaster.connect(user).withdraw(user.address)
+    ).to.be.rejectedWith("Ownable: caller is not the owner");
+  });
 
   it.skip("Should call succesfully zyfi-api", async function () {
     const mintAmount = BigNumber.from(10);
     const txData = erc20.interface.encodeFunctionData("mint", [
-      userWallet.address,
+      user.address,
       mintAmount,
     ]);
     let data = JSON.stringify({
       feeTokenAddress: erc20.address,
       txData: {
-        from: userWallet.address,
+        from: user.address,
         to: erc20.address,
         value: 0,
         data: txData,
@@ -232,13 +259,13 @@ describe("ERC20Paymaster", function () {
     // ).wait();
     // expect(successfulTx.status).to.be.eql(1);
 
-    const newBalance = await userWallet.getBalance();
-    const newBalance_ERC20 = await erc20.balanceOf(userWallet.address);
+    const newBalance = await user.getBalance();
+    const newBalance_ERC20 = await erc20.balanceOf(user.address);
     console.log("New Balance ERC20:", newBalance_ERC20.toString());
     expect(newBalance).to.be.eql(initialBalance);
     expect(newBalance_ERC20).to.be.eql(initialBalance_ERC20.add(mintAmount)); //5 minted - 1 fee
     expect(
-      await erc20.allowance(userWallet.address, paymaster.address)
+      await erc20.allowance(user.address, paymaster.address)
     ).to.be.eql(BigNumber.from(0));
   });
 });
