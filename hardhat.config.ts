@@ -17,14 +17,22 @@ const zkSyncTestnet =
         gas: 2100000,
         gasPrice: 8000000000,     
       }
-    : {
-      url: "https://testnet.era.zksync.dev",
-        ethNetwork: "goerli",
-        zksync: true,
-        // contract verification endpoint
-        verifyURL:
-          "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
-      };
+    // : {
+    //   url: "https://testnet.era.zksync.dev",
+    //     ethNetwork: "goerli",
+    //     zksync: true,
+    //     // contract verification endpoint
+    //     verifyURL:
+    //       "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+//   };
+: {
+  url: "process.env.RPC_ZKSYNC",
+    ethNetwork: "mainnet",
+    zksync: true,
+    // contract verification endpoint
+    verifyURL:
+      "https://explorer.zksync.io/contracts/verify",
+  };
 
 const config: HardhatUserConfig = {
   zksolc: {

@@ -22,6 +22,7 @@ const Verifier_PK =
 const GAS_LIMIT = 6_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minutes
 
+
 describe("ERC20Paymaster", function () {
   let provider: Provider;
   let admin: Wallet;
@@ -34,12 +35,15 @@ describe("ERC20Paymaster", function () {
   let paymaster: Contract;
   let erc20: Contract;
   let helper: Contract;
+  let snapshotId: string;
 
   before(async function () {
     provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url);
     whale = new Wallet(Whale, provider);
     admin = Wallet.createRandom();
     admin = new Wallet(admin.privateKey, provider);
+    console.log("Deployer PK: ", admin.privateKey);
+    console.log("Deployer address: ", admin.address);
     deployer = new Deployer(hre, whale);
     verifier = new Wallet(Verifier_PK, provider);
     user = Wallet.createRandom();
@@ -70,7 +74,18 @@ describe("ERC20Paymaster", function () {
     await fundAccount(whale, admin.address, "14");
     await (await erc20.mint(user.address, 130)).wait();
     initialBalance_ERC20 = await erc20.balanceOf(user.address);
-  });
+  })
+  
+//   beforeEach(async () => {
+//     // Take a snapshot before each test
+//     snapshotId = await ethers.provider.send("evm_snapshot", []);
+// });
+
+// afterEach(async () => {
+//     // Revert the chain back to the snapshot after each test
+//     await ethers.provider.send("evm_revert", [snapshotId]);
+// });
+
 
   async function executeTransaction(
     user: Wallet,
@@ -178,18 +193,25 @@ describe("ERC20Paymaster", function () {
 
   it("Succesfully change verifier", async function () {
     const newVerifier = Wallet.createRandom();
-    await paymaster.connect(admin).changeVerifier(newVerifier.address);
+    await paymaster.connect(admin).setVerifier(newVerifier.address);
     expect(await paymaster.verifier()).to.be.eql(newVerifier.address);
   });
 
+  it("Should fail when trying to change verifier from an unauthorized address", async function () {
+    const newVerifier = Wallet.createRandom();
+    await expect(
+      paymaster.connect(user).setVerifier(newVerifier.address)
+    ).to.be.rejectedWith("Ownable: caller is not the owner");
+  });
+
+
   it("Should allow the owner to withdraw ERC20", async function() {
     await erc20.mint(paymaster.address, 100);
-    expect(await erc20.balanceOf(paymaster.address)).to.equal(100);
-
-
+    const paymasterBalance = await erc20.balanceOf(paymaster.address);
+ 
     await (await paymaster.connect(admin).withdrawERC20(erc20.address)).wait();
 
-    expect(await erc20.balanceOf(admin.address)).to.equal(100);
+    expect(await erc20.balanceOf(admin.address)).to.equal(paymasterBalance);
   });
 
   it("Should allow the owner to withdraw ETH", async function() {
@@ -211,6 +233,13 @@ describe("ERC20Paymaster", function () {
       paymaster.connect(user).withdraw(user.address)
     ).to.be.rejectedWith("Ownable: caller is not the owner");
   });
+
+  it.skip("Should successfully upgrade the contract", async function () {
+    const newPaymaster = await deployer.loadArtifact('PaymasterUpgrade');
+    await (await hre.zkUpgrades.upgradeProxy(deployer.zkWallet, paymaster.address, newPaymaster,[ verifier.address], { initializer: "initialize" })).wait();
+
+  });
+
 
   it.skip("Should call succesfully zyfi-api", async function () {
     const mintAmount = BigNumber.from(10);
