@@ -7,9 +7,9 @@ import { ethers, BigNumber } from "ethers";
 import "@matterlabs/hardhat-zksync-chai-matchers";
 
 import { deployContract, fundAccount, getTimestamp } from "./testHelpers";
+import { Address } from "zksync-web3/build/src/types";
 
 import dotenv from "dotenv";
-import { Address } from "zksync-web3/build/src/types";
 dotenv.config();
 
 const Whale =
@@ -35,7 +35,6 @@ describe("ERC20Paymaster", function () {
   let paymaster: Contract;
   let erc20: Contract;
   let helper: Contract;
-  let snapshotId: string;
 
   before(async function () {
     provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url);
@@ -240,61 +239,4 @@ describe("ERC20Paymaster", function () {
 
   });
 
-
-  it.skip("Should call succesfully zyfi-api", async function () {
-    const mintAmount = BigNumber.from(10);
-    const txData = erc20.interface.encodeFunctionData("mint", [
-      user.address,
-      mintAmount,
-    ]);
-    let data = JSON.stringify({
-      feeTokenAddress: erc20.address,
-      txData: {
-        from: user.address,
-        to: erc20.address,
-        value: 0,
-        data: txData,
-      },
-    });
-
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: "http://localhost:3000/api/v1/generaltx",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: data,
-    };
-
-    let response = await axios.request(config);
-    // console.log("Response status:", response.status);
-    // console.log(JSON.stringify(response.data));
-    let rawTx = response.data.txData;
-    console.log("Raw Transaction:", rawTx);
-    // const successfulTx = await (
-    //   await erc20.connect(userWallet).mint(userWallet, mintAmount, {
-    //     maxFeePerGas: BigNumber.from(rawTx.maxFeePerGas),
-    //     maxPriorityFeePerGas: BigNumber.from(rawTx.maxPriorityFeePerGas),
-    //     gasLimit: rawTx.gasLimit,
-    //     customData: {
-    //       paymasterParams: {
-    //         paymaster: paymaster.address,
-    //         paymasterInput: rawTx.paymasterParams.paymasterInput,
-    //       },
-    //       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-    //     },
-    //   })
-    // ).wait();
-    // expect(successfulTx.status).to.be.eql(1);
-
-    const newBalance = await user.getBalance();
-    const newBalance_ERC20 = await erc20.balanceOf(user.address);
-    console.log("New Balance ERC20:", newBalance_ERC20.toString());
-    expect(newBalance).to.be.eql(initialBalance);
-    expect(newBalance_ERC20).to.be.eql(initialBalance_ERC20.add(mintAmount)); //5 minted - 1 fee
-    expect(
-      await erc20.allowance(user.address, paymaster.address)
-    ).to.be.eql(BigNumber.from(0));
-  });
 });

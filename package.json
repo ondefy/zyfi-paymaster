@@ -32,8 +32,14 @@
   },
   "scripts": {
     "local-node": "era_test_node run",
-    "test": "NODE_ENV=test hardhat test",
+    "test": "NODE_ENV=test hardhat test test/development/**",
+    "test:prod": "NODE_ENV=production hardhat test test/production/** --network zkSyncMainnet",
     "deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncTestnet",
+    "check:prod": "NODE_ENV=production hardhat run deploy/check-paymaster.ts --network zkSyncMainnet",
     "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
+  },
+  "dependencies": {
+    "eslint": "^8.51.0",
+    "hardhat-interface-generator": "^0.0.6"
   }
 }
