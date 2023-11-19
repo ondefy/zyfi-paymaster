@@ -340,6 +340,11 @@
       "address": "0xdb04290dCC22999cD6D0Bc9deA6b584d4BA3D272",
       "txHash": "0x076659bdc4d07667c450902754f3bb1441316f81420e069de59b280fc7d1e459",
       "kind": "uups"
+    },
+    {
+      "address": "0xE829398812b0f36287c03B55457cDF612d145E3B",
+      "txHash": "0x971ede43c9cd57399db7c945556e6fffba7de203d21ca9d623b12b5b9fc710ad",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -646,6 +651,106 @@
     "27dff8fab64639e3a1014d42fccf1b483c1105dbd5bada2c3833521929870ad3": {
       "address": "0x7bA3dc6f0e0C37BF26189D996fc3833a26A297Ee",
       "txHash": "0x5d22de7808d8652c644d525621cb6690a2887de510ea9bf04591a51e559d7ab9",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "verifier",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "Paymaster",
+            "src": "contracts/ERC20Paymaster.sol:43"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "beaee8ab17e3fe3891813995c37cd0d93c24438fe62e01921a842f67f9496b8b": {
+      "address": "0xb99b4F08e8474f0b27b29B75d3E027A9A0dEb1A8",
+      "txHash": "0x44c4e4c66bcae90d6f095f066b926a4bfbffce7b0b81a6e1e8916bb548a6ddf8",
       "layout": {
         "solcVersion": "0.8.20",
         "storage": [

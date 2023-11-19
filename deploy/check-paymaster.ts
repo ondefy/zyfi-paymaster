@@ -35,14 +35,14 @@ paymaster = new Contract(PAYMASTER_ADDRESS, paymasterArtifact.abi, provider)
 
 //create async function
 async function getSigner() {
-    const ethProvider = require("eth-provider"); // eth-provider is a simple EIP-1193 provider
-    const frame = Web3Provider("frame"); // Connect to Frame
-    frame.setChain(324); // <- change this line for any desired chain id
+    // const ethProvider = require("eth-provider"); // eth-provider is a simple EIP-1193 provider
+    // const frame = Web3Provider("frame"); // Connect to Frame
+    // frame.setChain(324); // <- change this line for any desired chain id
   
 	console.log("Paymaster:", paymaster.address)
 	signer = await paymaster.verifier()
 	console.log("Signer:", signer)
-	await paymaster.setVerifier(newSignerAddress)
+	// await paymaster.setVerifier(newSignerAddress)
 }
 getSigner()
 // describe("Check existing paymaster", function () {

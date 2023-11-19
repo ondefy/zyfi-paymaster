@@ -11,7 +11,7 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   let paymaster: Contract;
   let deployer: Deployer;
   let adminAddress: Address = "0xeacA6dB0aEe62c87a69C3d6Bcf6BCcc9388b7565";
-  let verifierAddress: Address = "0xFb8257B797cA0f4d2c77279797D6ddaA027BEE00";
+  let verifierAddress: Address = "0xe65D3C2A9C43985763515Dd92099a4c63B1e108C";
 
   // The wallet that will deploy the token and the paymaster
   // It is assumed that this wallet already has sufficient funds on zkSync
@@ -40,6 +40,11 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   let paymasterBalance = await provider.getBalance(paymaster.address);
 
   console.log(`Paymaster ETH balance is now ${paymasterBalance.toString()}`);
+
+  const verificationId = await hre.run("verify:verify", {
+    address: paymaster.address,
+    contract: "Paymaster",
+  });
 
   // // Supplying the ERC20 tokens to the empty wallet:
   // await // We will give the empty wallet 3 units of the token:

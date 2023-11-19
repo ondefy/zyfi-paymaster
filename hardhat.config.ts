@@ -34,7 +34,7 @@ const zkSyncMainnet = {
 	ethNetwork: "mainnet",
 	zksync: true,
 	// contract verification endpoint
-	verifyURL: "https://explorer.zksync.io/contracts/verify",
+	verifyURL: "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
 }
 
 const config: HardhatUserConfig = {
@@ -53,7 +53,13 @@ const config: HardhatUserConfig = {
 		zkSyncMainnet,
 	},
 	solidity: {
-		version: "0.8.20",
+		version: "0.8.23",
+		settings: {
+			optimizer: {
+				enabled: true,
+				runs: 200,
+			},
+		},
 	},
 }
 
