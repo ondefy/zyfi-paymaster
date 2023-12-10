@@ -1,13 +1,13 @@
 import axios from "axios"
 import { expect, use } from "chai"
-import { Wallet, Provider, Contract, utils } from "zksync-web3"
+import { Wallet, Provider, Contract, utils } from "zksync-ethers"
 import * as hre from "hardhat"
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy"
-import { ethers, BigNumber } from "ethers"
+import { ethers } from "ethers"
 import "@matterlabs/hardhat-zksync-chai-matchers"
 
 import { deployContract, fundAccount, getTimestamp } from "./testHelpers"
-import { Address } from "zksync-web3/build/src/types"
+import { Address } from "zksync-ethers/build/src/types"
 
 import dotenv from "dotenv"
 dotenv.config()
@@ -27,13 +27,14 @@ describe("ERC20Paymaster", function () {
 	let deployer: Deployer
 	let user: Wallet
 	let verifier: Wallet
-	let initialBalance: BigNumber
-	let initialBalance_ERC20: BigNumber
+	let initialBalance: BigInt
+	let initialBalance_ERC20: BigInt
 	let paymaster: Contract
 	let erc20: Contract
 	let helper: Contract
 
 	before(async function () {
+		console.log()
 		provider = new Provider(hre.userConfig.networks?.zkSyncTestnet?.url)
 		whale = new Wallet(Whale, provider)
 		admin = Wallet.createRandom()
@@ -84,7 +85,7 @@ describe("ERC20Paymaster", function () {
 		user: Wallet,
 		token: Address,
 		payType: "ApprovalBased" | "General",
-		correctSignature: Boolean = true,
+		correctSignature: Boolean = true
 	) {
 		const gasPrice = await provider.getGasPrice()
 		const minimalAllowance = BigNumber.from(1)
@@ -97,7 +98,7 @@ describe("ERC20Paymaster", function () {
 			// used to test the wrong signature path
 			correctSignature ? minimalAllowance : minimalAllowance.add(1),
 			gasPrice,
-			BigNumber.from(GAS_LIMIT),
+			BigNumber.from(GAS_LIMIT)
 		)
 
 		const SignedMessageHash = await verifier.signMessage(ethers.utils.arrayify(messageHash))
@@ -112,7 +113,7 @@ describe("ERC20Paymaster", function () {
 
 		await (
 			await erc20.connect(user).mint(user.address, 5, {
-				maxPriorityFeePerGas: BigNumber.from(0),
+				maxPriorityFeePerGas: BigInt.from(0),
 				maxFeePerGas: gasPrice,
 				gasLimit: GAS_LIMIT,
 				customData: {
@@ -127,13 +128,13 @@ describe("ERC20Paymaster", function () {
 		_from: Address,
 		_to: Address,
 		_token: Address,
-		_amount: BigNumber,
-		_maxFeePerGas: BigNumber,
-		_gasLimit: BigNumber,
+		_amount: BigInt,
+		_maxFeePerGas: BigInt,
+		_gasLimit: BigInt
 	) {
 		return ethers.utils.solidityKeccak256(
 			["address", "address", "address", "uint256", "uint256", "uint256"],
-			[_from, _to, _token, _amount, _maxFeePerGas, _gasLimit],
+			[_from, _to, _token, _amount, _maxFeePerGas, _gasLimit]
 		)
 	}
 
@@ -155,7 +156,7 @@ describe("ERC20Paymaster", function () {
 
 	it("Should not validate a wrong signature", async function () {
 		await expect(executeTransaction(user, erc20.address, "ApprovalBased", false)).to.be.rejectedWith(
-			"Invalid signature",
+			"Invalid signature"
 		)
 	})
 
@@ -182,7 +183,7 @@ describe("ERC20Paymaster", function () {
 	it("Should fail when trying to change verifier from an unauthorized address", async function () {
 		const newVerifier = Wallet.createRandom()
 		await expect(paymaster.connect(user).setVerifier(newVerifier.address)).to.be.rejectedWith(
-			"Ownable: caller is not the owner",
+			"Ownable: caller is not the owner"
 		)
 	})
 
@@ -204,7 +205,7 @@ describe("ERC20Paymaster", function () {
 	})
 	it("Should fail when trying to transfer ERC20 tokens from an unauthorized address", async function () {
 		await expect(paymaster.connect(user).withdrawERC20(erc20.address)).to.be.rejectedWith(
-			"Ownable: caller is not the owner",
+			"Ownable: caller is not the owner"
 		)
 	})
 
@@ -212,13 +213,13 @@ describe("ERC20Paymaster", function () {
 		await expect(paymaster.connect(user).withdraw(user.address)).to.be.rejectedWith("Ownable: caller is not the owner")
 	})
 
-	it.skip("Should successfully upgrade the contract", async function () {
-		const newPaymaster = await deployer.loadArtifact("PaymasterUpgrade")
-		await (
-			await hre.zkUpgrades.upgradeProxy(deployer.zkWallet, paymaster.address, newPaymaster, [verifier.address], {
-				initializer: "initialize",
-			})
-		).wait()
-	})
+	// it.skip("Should successfully upgrade the contract", async function () {
+	// 	const newPaymaster = await deployer.loadArtifact("PaymasterUpgrade")
+	// 	await (
+	// 		await hre.zkUpgrades.upgradeProxy(deployer.zkWallet, paymaster.address, newPaymaster, [verifier.address], {
+	// 			initializer: "initialize",
+	// 		})
+	// 	).wait()
+	// })
 })
 

@@ -1,46 +1,41 @@
 {
-  "name": "zyfi-paymaster",
-  "version": "1.0.0",
-  "main": "index.js",
-  "author": "Lutro - Ondefy",
-  "license": "MIT",
-  "devDependencies": {
-    "@matterlabs/hardhat-zksync-chai-matchers": "^1.0.0",
-    "@matterlabs/hardhat-zksync-deploy": "^1.0.1",
-    "@matterlabs/hardhat-zksync-solc": "^1.0.3",
-    "@matterlabs/hardhat-zksync-upgradable": "^1.0.0",
-    "@matterlabs/hardhat-zksync-verify": "^1.1.1",
-    "@matterlabs/zksync-contracts": "^0.6.1",
-    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
-    "@nomicfoundation/hardhat-verify": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts": "^5.0.0",
-    "@openzeppelin/contracts-upgradeable": "^5.0.0",
-    "@types/chai": "^4.3.6",
-    "@types/mocha": "^10.0.1",
-    "axios": "^1.5.1",
-    "chai": "^4.3.8",
-    "dotenv": "^16.0.3",
-    "ethers": "^6.9.0",
-    "hardhat": "^2.12.4",
-    "mocha": "^10.2.0",
-    "prettier": "^3.0.3",
-    "prettier-plugin-solidity": "^1.1.3",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.3.2",
-    "zksync-web3": "^0.17.1"
-  },
-  "scripts": {
-    "local-node": "era_test_node run",
-    "test": "NODE_ENV=test hardhat test test/development/**",
-    "test:prod": "NODE_ENV=production hardhat test test/production/** --network zkSyncMainnet",
-    "deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncMainnet",
-    "check:prod": "NODE_ENV=production hardhat run deploy/check-paymaster.ts --network zkSyncMainnet",
-    "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
-  },
-  "dependencies": {
-    "eslint": "^8.51.0",
-    "eth-provider": "^0.13.6",
-    "hardhat-interface-generator": "^0.0.6"
-  }
+	"name": "zyfi-paymaster",
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "Lutro - Ondefy",
+	"license": "MIT",
+	"scripts": {
+		"local-node": "era_test_node fork --fork-at 20600000 mainnet",
+		"test": "NODE_ENV=test hardhat test test/development/**",
+		"test:prod": "NODE_ENV=production hardhat test test/production/** --network zkSyncMainnet",
+		"deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncMainnet",
+		"check:prod": "NODE_ENV=production hardhat run deploy/check-paymaster.ts --network zkSyncMainnet",
+		"prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
+	},
+	"devDependencies": {
+		"@matterlabs/hardhat-zksync-deploy": "^1.1.0",
+		"@matterlabs/hardhat-zksync-solc": "^1.0.3",
+		"@matterlabs/hardhat-zksync-upgradable": "^1.2.0",
+		"@matterlabs/hardhat-zksync-verify": "^1.2.0",
+		"@matterlabs/zksync-contracts": "^0.6.1",
+		"@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
+		"@nomicfoundation/hardhat-ethers": "^3.0.5",
+		"@openzeppelin/contracts": "^4.6.0",
+		"@openzeppelin/contracts-upgradeable": "^4.6.0",
+		"@types/chai": "^4.3.11",
+		"@types/mocha": "^10.0.6",
+		"chai": "^4.3.10",
+		"dotenv": "^16.3.1",
+		"ethers": "^6.9.0",
+		"hardhat": "^2.19.2",
+		"mocha": "^10.2.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
+	},
+	"dependencies": {
+		"@matterlabs/hardhat-zksync-chai-matchers": "^1.2.0",
+		"eslint": "^8.55.0",
+		"eth-provider": "^0.13.6",
+		"zksync-ethers": "^6.0.0"
+	}
 }

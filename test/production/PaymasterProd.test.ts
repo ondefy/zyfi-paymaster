@@ -1,13 +1,13 @@
 import axios from "axios"
 import { expect, use } from "chai"
-import { Wallet, Provider, Contract, types } from "zksync-web3"
+import { Wallet, Provider, Contract, types } from "zksync-ethers"
 import * as hre from "hardhat"
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy"
 import { ethers, BigNumber, utils } from "ethers"
 import "@matterlabs/hardhat-zksync-chai-matchers"
-import { Address } from "zksync-web3/build/src/types"
-import { IERC20 } from "zksync-web3/build/src/utils"
-import { IPaymaster } from "zksync-web3/build/src/utils"
+import { Address } from "zksync-ethers/build/src/types"
+import { IERC20 } from "zksync-ethers/build/src/utils"
+import { IPaymaster } from "zksync-ethers/build/src/utils"
 
 import dotenv from "dotenv"
 dotenv.config()

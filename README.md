@@ -39,7 +39,7 @@ cargo install --git https://github.com/matter-labs/era-test-node.git --locked
 Rust should install it in the ~/.cargo/bin directory.
 
 To start the node, execute:
-
+<!--  -->
 ```
 yarn local-node
 ```

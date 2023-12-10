@@ -1,18 +1,18 @@
-import { Wallet, Provider, Contract, utils, types, Web3Provider } from "zksync-web3"
-import {  network, run } from "hardhat"
+import { Wallet, Provider, Contract, utils, types, Web3Provider } from "zksync-ethers"
+import { network, run } from "hardhat"
 import { ethers, BigNumber } from "ethers"
 import "@matterlabs/hardhat-zksync-chai-matchers"
-import { Address } from "zksync-web3/build/src/types"
-import { IERC20, IPaymasterFlow } from "zksync-web3/build/src/utils"
+import { Address } from "zksync-ethers/build/src/types"
+import { IERC20, IPaymasterFlow } from "zksync-ethers/build/src/utils"
 import dotenv from "dotenv"
 dotenv.config()
 
-const SLEEP_MILLISECONDS = 120000;
+const SLEEP_MILLISECONDS = 120000
 
 async function sleep() {
-  console.log('start sleep ' + SLEEP_MILLISECONDS + ' milliSeconds');
-  await new Promise(resolve => setTimeout(resolve, SLEEP_MILLISECONDS));
-  console.log('end sleep');
+	console.log("start sleep " + SLEEP_MILLISECONDS + " milliSeconds")
+	await new Promise(resolve => setTimeout(resolve, SLEEP_MILLISECONDS))
+	console.log("end sleep")
 }
 
 let provider: Provider
@@ -35,10 +35,10 @@ paymaster = new Contract(PAYMASTER_ADDRESS, paymasterArtifact.abi, provider)
 
 //create async function
 async function getSigner() {
-    // const ethProvider = require("eth-provider"); // eth-provider is a simple EIP-1193 provider
-    // const frame = Web3Provider("frame"); // Connect to Frame
-    // frame.setChain(324); // <- change this line for any desired chain id
-  
+	// const ethProvider = require("eth-provider"); // eth-provider is a simple EIP-1193 provider
+	// const frame = Web3Provider("frame"); // Connect to Frame
+	// frame.setChain(324); // <- change this line for any desired chain id
+
 	console.log("Paymaster:", paymaster.address)
 	signer = await paymaster.verifier()
 	console.log("Signer:", signer)
