@@ -1,5 +1,9 @@
 # Zyfi Paymaster
 
+Paymaster implementation for [Zyfi](https://zyfi.org/).
+
+It supports any ERC-20 token, and can easily be integrated using an [API](https://docs.zyfi.org/).
+
 This project was scaffolded with [zksync-cli](https://github.com/matter-labs/zksync-cli).
 
 ## Project structure
