@@ -1,61 +1,68 @@
-import { HardhatUserConfig } from "hardhat/config"
+import "@matterlabs/hardhat-zksync-chai-matchers";
+import "@matterlabs/hardhat-zksync-deploy";
+import "@matterlabs/hardhat-zksync-node";
+import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-upgradable";
+import "@matterlabs/hardhat-zksync-verify";
+import "@nomicfoundation/hardhat-chai-matchers";
 
-import "@matterlabs/hardhat-zksync-deploy"
-import "@matterlabs/hardhat-zksync-solc"
-import "@matterlabs/hardhat-zksync-verify"
-import "@matterlabs/hardhat-zksync-upgradable"
-import "hardhat-interface-generator"
-
-// load env file
-import dotenv from "dotenv"
-dotenv.config()
-
-// dynamically changes endpoints for local tests
-const zkSyncTestnet =
-	process.env.NODE_ENV == "test"
-		? {
-				url: "http://localhost:8011",
-				ethNetwork: "http://localhost:8545",
-				zksync: true,
-				allowUnlimitedContractSize: true,
-				gas: 2100000,
-				gasPrice: 8000000000,
-		  }
-		: {
-				url: "https://testnet.era.zksync.dev",
-				ethNetwork: "goerli",
-				zksync: true,
-				// contract verification endpoint
-				verifyURL: "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
-		  }
-
-const zkSyncMainnet = {
-	url: process.env.RPC_ZKSYNC!,
-	ethNetwork: "mainnet",
-	zksync: true,
-	// contract verification endpoint
-	verifyURL: "https://explorer.zksync.io/contracts/verify",
-}
+import { HardhatUserConfig } from "hardhat/config";
 
 const config: HardhatUserConfig = {
-	zksolc: {
-		version: "latest",
-		settings: {},
-	},
-	// defaults to zkSync network
-	defaultNetwork: "zkSyncTestnet",
+	defaultNetwork: "zkSyncSepoliaTestnet",
 	networks: {
+		zkSyncSepoliaTestnet: {
+			url: "https://sepolia.era.zksync.dev",
+			ethNetwork: "sepolia",
+			zksync: true,
+			verifyURL:
+				"https://explorer.sepolia.era.zksync.dev/contract_verification",
+		},
+		zkSyncMainnet: {
+			url: "https://mainnet.era.zksync.io",
+			ethNetwork: "mainnet",
+			zksync: true,
+			verifyURL:
+				"https://zksync2-mainnet-explorer.zksync.io/contract_verification",
+		},
+		zkSyncGoerliTestnet: {
+			// deprecated network
+			url: "https://testnet.era.zksync.dev",
+			ethNetwork: "goerli",
+			zksync: true,
+			verifyURL:
+				"https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+		},
+		dockerizedNode: {
+			url: "http://localhost:3050",
+			ethNetwork: "http://localhost:8545",
+			zksync: true,
+		},
+		inMemoryNode: {
+			url: "http://127.0.0.1:8011",
+			ethNetwork: "", // in-memory node doesn't support eth node; removing this line will cause an error
+			zksync: true,
+		},
 		hardhat: {
 			zksync: true,
 		},
-		// load test network details
-		zkSyncTestnet,
-		zkSyncMainnet,
+	},
+	zksolc: {
+		version: "latest",
+		settings: {
+			// find all available options in the official documentation
+			// https://era.zksync.io/docs/tools/hardhat/hardhat-zksync-solc.html#configuration
+		},
 	},
 	solidity: {
-		version: "0.8.20",
+		version: "0.8.23",
+		settings: {
+			optimizer: {
+				enabled: true,
+				runs: 200,
+			},
+		},
 	},
-}
+};
 
-export default config
-
+export default config;

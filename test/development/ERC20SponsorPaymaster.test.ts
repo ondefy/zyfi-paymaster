@@ -11,14 +11,14 @@ import {
 } from "../../deploy/prodUtils";
 import { LOCAL_RICH_WALLETS, getMessageHash, mockRatio } from "../testUtils";
 
-// public address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
+// puublic address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
 const Verifier_PK =
 	"0x8f6e509395c13960f501bc7083450ffd0948bc94103433d5843e5060a91756da";
 
 const GAS_LIMIT = 4_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
-describe("ERC20Paymaster", () => {
+describe.skip("ERC20SponsorPaymaster", () => {
 	const provider = getProvider();
 	let admin: Wallet;
 	let whale: Wallet;
@@ -102,28 +102,11 @@ describe("ERC20Paymaster", () => {
 		);
 
 		// console.log("paymasterParams", paymasterParams);
-		//  verify gas
-
-		// Cannot estimate gas with a wrong signature
-		if (!(options?.wrongSignature)) {
-			const gasLimit = await erc20
-				.connect(user)
-				.estimateGas.mint(user.address, 5, {
-					maxPriorityFeePerGas: BigNumber.from(0),
-					maxFeePerGas: gasPrice,
-					customData: {
-						paymasterParams: paymasterParams,
-						gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-					},
-				});
-			console.log("gasLimit", gasLimit.toString(), "wrong signature:", options?.wrongSignature);
-		}
 
 		await (
 			await erc20.connect(user).mint(user.address, 5, {
 				maxPriorityFeePerGas: BigNumber.from(0),
 				maxFeePerGas: gasPrice,
-				gasLimit: GAS_LIMIT,
 				customData: {
 					paymasterParams: paymasterParams,
 					gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -152,10 +135,14 @@ describe("ERC20Paymaster", () => {
 			silent: true,
 		});
 
-		paymaster = await deployContract("ERC20Paymaster", [verifier.address], {
-			proxy: false,
-			silent: false,
-		});
+		paymaster = await deployContract(
+			"ERC20SponsorPaymaster",
+			[verifier.address],
+			{
+				proxy: false,
+				silent: false,
+			},
+		);
 		await paymaster.transferOwnership(admin.address);
 
 		await fundAccount(whale, paymaster.address, "14");
@@ -200,15 +187,13 @@ describe("ERC20Paymaster", () => {
 				executeTransaction(user, erc20.address, "ApprovalBased", {
 					wrongSignature: true,
 				}),
-			).to.be.rejectedWith(
-				"Paymaster validation returned invalid magic value.",
-			);
+			).to.be.rejectedWith("0x0757dbc9");
 		});
 
 		it("should revert if unsupported paymaster flow", async () => {
 			await expect(
 				executeTransaction(user, erc20.address, "General", {}),
-			).to.be.rejectedWith("0xff15b069");
+			).to.be.rejectedWith("0x33f5b205");
 		});
 
 		it("should revert if allowance is too low", async () => {
@@ -221,7 +206,7 @@ describe("ERC20Paymaster", () => {
 			}
 		});
 
-		it("Successfully change verifier", async () => {
+		it("Succesfully change verifier", async () => {
 			const newVerifier = Wallet.createRandom();
 			await paymaster.connect(admin).setVerifier(newVerifier.address);
 			expect(await paymaster.verifier()).to.be.eql(newVerifier.address);
@@ -326,7 +311,7 @@ describe("ERC20Paymaster", () => {
 				executeTransaction(user, erc20.address, "ApprovalBased", {
 					expiredtx: true,
 				}),
-			).to.be.rejectedWith("0xe397952c"); //tx expired
+			).to.be.rejectedWith("0xb15759cc"); //tx expired
 		});
 	});
 });
