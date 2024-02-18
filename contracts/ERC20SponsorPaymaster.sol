@@ -400,10 +400,12 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
      * @notice Sets the markup for a specific protocol address.
      * @param _address The address for which to set the markup.
      * @param _newMarkup The markup value to set.
+     * @dev Allows the markup to be set back to 0, which means the default markup will be used.
      */
     function setMarkup(address _address, uint256 _newMarkup) public onlyOwner {
         // Refuses a markup lower than 50% and higher than 200%
-        if (_newMarkup < 50_00 || _newMarkup > 200_00)
+        // Accepts 0 to reset the protocol to using the default markup
+        if ((_newMarkup != 0 && _newMarkup < 50_00) || _newMarkup > 200_00)
             revert Errors.InvalidMarkup();
         markups[_address] = _newMarkup;
     }
