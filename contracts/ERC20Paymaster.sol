@@ -286,5 +286,10 @@ contract ERC20Paymaster is IPaymaster, Ownable {
         }
     }
 
+    /**
+     * @dev The Ownable renounceOwnership function is overridden to prevent a premature call from locking up the contract's ETH or ERC20s balance.
+     */
+    function renounceOwnership() public override onlyOwner {}
+
     receive() external payable {}
 }

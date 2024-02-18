@@ -331,4 +331,10 @@ describe("ERC20Paymaster", () => {
       ).to.be.rejectedWith("0xe397952c"); //tx expired
     });
   });
+  describe("Cantina audit", () => {
+    it("Should not renounce ownership", async () => {
+      await paymaster.connect(admin).renounceOwnership();
+      expect(await paymaster.owner()).to.be.eql(admin.address);
+    });
+  });
 });
