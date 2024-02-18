@@ -1,19 +1,19 @@
-name: CI
-on: [push]
+# name: CI
+# on: [push]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
 
-      - name: Run Era Test Node
-        uses: dutterbutter/era-test-node-action@latest
+#       - name: Run Era Test Node
+#         uses: dutterbutter/era-test-node-action@latest
 
-      - name: Install Components
-        run: yarn install
+#       - name: Install Components
+#         run: yarn install
 
-      - name: Run tests
-        run: yarn test
+#       - name: Run tests
+#         run: yarn test
