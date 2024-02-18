@@ -42,7 +42,9 @@ contract SponsorshipVault {
      */
     function depositToAccount(address account) public payable {
         if (account == address(0)) revert Errors.InvalidAddress();
-        balances[account] += msg.value;
+        unchecked {
+            balances[account] += msg.value;
+        }
         emit Deposited(account, msg.value);
     }
 
@@ -55,7 +57,9 @@ contract SponsorshipVault {
      */
     function withdraw(uint256 amount) public {
         if (amount > balances[msg.sender]) revert Errors.NotEnoughFunds();
-        balances[msg.sender] -= amount;
+        unchecked {
+            balances[msg.sender] -= amount;
+        }
         (bool sent, ) = payable(msg.sender).call{value: amount}("");
         if (!sent) revert Errors.FailedWithdrawal();
         emit Withdrawn(msg.sender, amount);
@@ -74,7 +78,9 @@ contract SponsorshipVault {
         uint256 amount
     ) public onlyPaymaster {
         if (amount > balances[account]) revert Errors.NotEnoughFunds();
-        balances[account] -= amount;
+        unchecked {
+            balances[account] -= amount;
+        }
         (bool sent, ) = payable(paymaster).call{value: amount}("");
         if (!sent) revert Errors.FailedTransferToPaymaster();
         emit paidSponsorship(account, amount);
@@ -86,7 +92,9 @@ contract SponsorshipVault {
      * @dev Only the paymaster is allowed to call this function, to allow for easier tracking
      */
     function refundSponsorship(address account) public payable onlyPaymaster {
-        balances[account] += msg.value;
+        unchecked {
+            balances[account] += msg.value;
+        }
         emit refundedSponsorship(account, msg.value);
     }
 
