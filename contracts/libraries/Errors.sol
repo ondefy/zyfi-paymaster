@@ -11,6 +11,7 @@ library Errors {
     error TransactionExpired();
     error InvalidAddress();
     error InvalidMarkup();
+    error InvalidNonce();
     error InvalidRatio();
     error AllowanceTooLow();
     error FailedTransferToBootloader();
