@@ -58,6 +58,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
     event VerifierChanged(address indexed newVerifier);
     event VaultChanged(address indexed newVault);
     event DefaultMarkupChanged(uint256 newMarkup);
+    event MarkupChanged(address indexed protocol, uint256 newMarkup);
     event RefundedToken(
         address indexed account,
         address indexed token,
@@ -418,6 +419,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         if ((_newMarkup != 0 && _newMarkup < 50_00) || _newMarkup > 200_00)
             revert Errors.InvalidMarkup();
         markups[_address] = _newMarkup;
+        emit MarkupChanged(_address, _newMarkup);
     }
 
     /**
