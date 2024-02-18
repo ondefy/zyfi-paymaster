@@ -56,6 +56,7 @@ contract ERC20Paymaster is IPaymaster, Ownable {
     }
 
     constructor(address _verifier) {
+        if (_verifier == address(0)) revert Errors.InvalidAddress();
         verifier = _verifier;
         emit VerifierChanged(_verifier);
     }
@@ -226,6 +227,7 @@ contract ERC20Paymaster is IPaymaster, Ownable {
      * @param _newVerifier The new verifier address.
      */
     function setVerifier(address _newVerifier) external onlyOwner {
+        if (_newVerifier == address(0)) revert Errors.InvalidAddress();
         verifier = _newVerifier;
         emit VerifierChanged(_newVerifier);
     }
