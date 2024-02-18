@@ -360,5 +360,9 @@ describe("ERC20Paymaster", () => {
         );
       }
     });
+    it("Should fail when setting verifier to zero address", async () => {
+      expect(paymaster.connect(admin).setVerifier(ethers.constants.AddressZero))
+        .to.be.rejected;
+    });
   });
 });
