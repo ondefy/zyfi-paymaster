@@ -1,6 +1,6 @@
-import { Contract, Wallet } from "zksync-web3";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { ethers, providers } from "ethers";
+import { Contract, Wallet } from "zksync-web3";
 
 export async function deployContract(
   deployer: Deployer,
@@ -28,6 +28,5 @@ export async function fundAccount(
 }
 
 export async function getTimestamp(provider: providers.JsonRpcProvider) {
-
   return block.timestamp;
 }
