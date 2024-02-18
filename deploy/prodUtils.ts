@@ -115,7 +115,9 @@ export const deployContract = async (
 
   log(`\nStarting deployment process of "${contractArtifactName}"...`);
 
-  const isLocalNetwork = hre.network.name === "zkSyncEraTestNode";
+  const isLocalNetwork =
+    hre.network.name === "zkSyncEraTestNode" ||
+    hre.network.name === "inMemoryNode";
   const defaultPrivateKey = isLocalNetwork
     ? LOCAL_RICH_WALLETS[0].privateKey
     : undefined;

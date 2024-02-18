@@ -327,16 +327,29 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
 
     /**
      * @notice Withdraws a specified amount of ETH from the paymaster contract and sends it to the given address.
+     * Can only be called by the contract owner.
      * @param to The address to which the ETH will be sent.
      * @param amount The amount of ETH to be withdrawn.
-     *
-     * Requirements:
-     * - The `to` address must not be the zero address.
-     * - The paymaster contract must have sufficient funds to cover the withdrawal amount.
-     *
-     * Emits a `Withdrawal` event upon successful withdrawal.
      */
     function withdrawETH(address to, uint256 amount) external onlyOwner {
+        _withdrawETH(to, amount);
+    }
+
+    /**
+     * @dev Withdraws all ETH from the contract and transfers it to the specified address.
+     * Can only be called by the contract owner.
+     * @param to The address to transfer the ETH to.
+     */
+    function withdrawAllETH(address to) external onlyOwner {
+        _withdrawETH(to, address(this).balance);
+    }
+
+    /**
+     * @dev Internal function to withdraw ETH from the contract.
+     * @param to The address to which the ETH will be transferred.
+     * @param amount The amount of ETH to be withdrawn.
+     */
+    function _withdrawETH(address to, uint256 amount) internal {
         if (to == address(0)) revert Errors.InvalidAddress();
         (bool success, ) = payable(to).call{value: amount}("");
         if (!success) revert Errors.FailedTransfer();
