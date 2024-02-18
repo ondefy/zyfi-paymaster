@@ -8,7 +8,7 @@
 	"repository": "https://github.com/matter-labs/zksync-hardhat-template.git",
 	"scripts": {
 		"local-node": "npx zksync-cli dev start",
-		"test": "rm -f .upgradable/undefined.json && hardhat test --network inMemoryNode test/development/**",
+		"test": "rm -f .upgradable/undefined.json && hardhat test --network hardhat test/development/**",
 		"test:prod": "hardhat test --network zkSyncMainnet test/production/** ",
 		"deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncMainnet",
 		"check:prod": "hardhat run deploy/check-paymaster.ts --network zkSyncMainnet",
