@@ -105,30 +105,29 @@ describe("ERC20Paymaster", () => {
     //  verify gas
 
     // Cannot estimate gas with a wrong signature
-    if (!options?.wrongSignature) {
-      const gasLimit = await erc20
-        .connect(user)
-        .estimateGas.mint(user.address, 5, {
-          maxPriorityFeePerGas: BigNumber.from(0),
-          maxFeePerGas: gasPrice,
-          customData: {
-            paymasterParams: paymasterParams,
-            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          },
-        });
-      console.log(
-        "gasLimit",
-        gasLimit.toString(),
-        "wrong signature:",
-        options?.wrongSignature
-      );
-    }
+    // if (!options?.wrongSignature) {
+    //   const gasLimit = await erc20
+    //     .connect(user)
+    //     .estimateGas.mint(user.address, 5, {
+    //       maxPriorityFeePerGas: BigNumber.from(0),
+    //       maxFeePerGas: gasPrice,
+    //       customData: {
+    //         paymasterParams: paymasterParams,
+    //         gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+    //       },
+    //     });
+    //   console.log(
+    //     "gasLimit",
+    //     gasLimit.toString(),
+    //     "wrong signature:",
+    //     options?.wrongSignature
+    //   );
+    // }
 
     await (
       await erc20.connect(user).mint(user.address, 5, {
         maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: gasPrice,
-        gasLimit: GAS_LIMIT,
         customData: {
           paymasterParams: paymasterParams,
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -335,6 +334,31 @@ describe("ERC20Paymaster", () => {
     it("Should not renounce ownership", async () => {
       await paymaster.connect(admin).renounceOwnership();
       expect(await paymaster.owner()).to.be.eql(admin.address);
+    });
+    it("Should allow the owner withdraw all ETH", async () => {
+      await (
+        await paymaster.connect(admin).withdrawAllETH(admin.address)
+      ).wait();
+      expect(await provider.getBalance(paymaster.address)).to.be.eql(
+        BigNumber.from(0)
+      );
+    });
+    it("Should fail when trying to withdraw all ETH from an unauthorized address", async () => {
+      await expect(
+        paymaster.connect(user).withdrawAllETH(user.address)
+      ).to.be.rejectedWith("Ownable: caller is not the owner");
+    });
+    it("Should fail when calling internal function", async () => {
+      try {
+        await paymaster
+          .connect(admin)
+          ._withdrawETH(admin.address, BigNumber.from(10));
+        expect.fail("Expected _withdrawETH call to fail, but it did not.");
+      } catch (error) {
+        expect(error.message).to.include(
+          "paymaster.connect(...)._withdrawETH is not a function"
+        );
+      }
     });
   });
 });
