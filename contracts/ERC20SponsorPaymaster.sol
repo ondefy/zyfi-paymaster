@@ -416,7 +416,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
     function setMarkup(address _address, uint256 _newMarkup) public onlyOwner {
         // Refuses a markup lower than 50% and higher than 200%
         // Accepts 0 to reset the protocol to using the default markup
-        if ((_newMarkup != 0 && _newMarkup < 50_00) || _newMarkup > 200_00)
+        if (_newMarkup != 0 && (_newMarkup < 50_00 || _newMarkup > 200_00))
             revert Errors.InvalidMarkup();
         markups[_address] = _newMarkup;
         emit MarkupChanged(_address, _newMarkup);
