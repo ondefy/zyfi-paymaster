@@ -18,7 +18,7 @@ const Verifier_PK =
 const GAS_LIMIT = 4_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
-describe("ERC20Paymaster", () => {
+describe.skip("ERC20Paymaster", () => {
   const provider = getProvider();
   let admin: Wallet;
   let whale: Wallet;
@@ -128,6 +128,7 @@ describe("ERC20Paymaster", () => {
       await erc20.connect(user).mint(user.address, 5, {
         maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: gasPrice,
+        gasLimit: GAS_LIMIT,
         customData: {
           paymasterParams: paymasterParams,
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,

@@ -34,6 +34,46 @@ export async function getMessageHash(
   );
 }
 
+export async function getMessageHashSponsor(
+  _from: Address,
+  _to: Address,
+  _token: Address,
+  _amount: BigNumber,
+  _expirationTime: BigNumber,
+  _maxNonce: BigNumber,
+  _protocolAddress: Address,
+  _sponsorshipRatio: BigNumber,
+  _maxFeePerGas: BigNumber,
+  _gasLimit: BigNumber
+) {
+  return ethers.utils.solidityKeccak256(
+    [
+      "address",
+      "address",
+      "address",
+      "uint256",
+      "uint64",
+      "uint256",
+      "address",
+      "uint16",
+      "uint256",
+      "uint256",
+    ],
+    [
+      _from,
+      _to,
+      _token,
+      _amount,
+      _expirationTime,
+      _maxNonce,
+      _protocolAddress,
+      _sponsorshipRatio,
+      _maxFeePerGas,
+      _gasLimit,
+    ]
+  );
+}
+
 /**
  * Rich wallets can be used for testing purposes.
  * Available on zkSync In-memory node and Dockerized node.

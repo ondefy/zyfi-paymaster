@@ -50,6 +50,7 @@ export async function fundAccount(
       value: ethers.utils.parseEther(amount),
     })
   ).wait();
+  console.log(`Funded ${address} with ${amount} ETH`);
 }
 
 export const verifyEnoughBalance = async (
@@ -206,3 +207,16 @@ export const deployContract = async (
 
   return contract;
 };
+
+export async function getUserNonce(address) {
+  // This assumes you have already set up your Hardhat environment and you're calling this within an async function
+  
+  // Get the provider from Hardhat's environment
+  const provider = getProvider();
+
+  // Use the provider to get the nonce for the specified address
+  const nonce = await provider.getTransactionCount(address);
+
+  // console.log(`Nonce for address ${address} is: ${nonce}`);
+  return nonce;
+}

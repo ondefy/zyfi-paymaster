@@ -12,6 +12,7 @@ describe.skip("SponsorshipVault", () => {
   let verifier: Wallet;
   let user1: Wallet;
   let user2: Wallet;
+  let erc20: Contract;
   const provider = getProvider();
   const amount = ethers.utils.parseEther("1");
 
@@ -19,9 +20,10 @@ describe.skip("SponsorshipVault", () => {
     user1 = getWallet(LOCAL_RICH_WALLETS[0].privateKey);
     user2 = getWallet(LOCAL_RICH_WALLETS[1].privateKey);
     verifier = getWallet(LOCAL_RICH_WALLETS[2].privateKey);
-    erc20.address;
-    paymaster = await deployContract("Paymaster", [verifier.address], {
-      proxy: true,
+    erc20 = await deployContract("MockERC20", ["TestToken", "Test", 18], {
+      silent: true,
+    });
+    paymaster = await deployContract("ERC20SponsorPaymaster", [verifier.address], {
       silent: true,
     });
 

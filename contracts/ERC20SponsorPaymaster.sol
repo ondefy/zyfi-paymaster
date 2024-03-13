@@ -35,6 +35,9 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
     // Using OpenZeppelin's SafeERC20 library to perform token transfers
     using SafeERC20 for IERC20;
 
+    // Used to identify the contract version
+    string public constant version = "1.0";
+
     // The nominator used for markup calculations
     uint256 constant MARKUP_NOMINATOR = 1e4;
     // The nominator used for calculating the sponsorship ratio
@@ -48,9 +51,6 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
 
     // Public address of the Zyfi signer
     address public verifier;
-
-    // Used to identify the contract version
-    string public constant version = "1.0";
 
     // Address of the SponsorshipVault
     address public vault;
