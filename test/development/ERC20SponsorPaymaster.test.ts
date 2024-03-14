@@ -18,7 +18,7 @@ import {
 
 // puublic address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
 
-const GAS_LIMIT = 4_000_000;
+const GAS_LIMIT = 400_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
 describe("ERC20SponsorPaymaster", () => {
@@ -82,8 +82,10 @@ describe("ERC20SponsorPaymaster", () => {
     }
     //
     const maxNonce = BigNumber.from(
-      options?.usedNonce ? 0 : (await getUserNonce(user.address)) + 5
+      options?.usedNonce ? 0 : (await getUserNonce(user.address)) + 50
     );
+
+    console.log("maxNonce", maxNonce.toString());
 
     const sponsorshipRatio = BigNumber.from(options?.sponsorshipRatio || 0);
     console.log("sponsorshipRatio", sponsorshipRatio.toString());
@@ -105,16 +107,25 @@ describe("ERC20SponsorPaymaster", () => {
       ethers.utils.arrayify(messageHash)
     );
 
+    console.log("SignedMessageHash", SignedMessageHash);
+
     const innerInput = ethers.utils.defaultAbiCoder.encode(
       ["uint64", "uint256", "address", "uint16", "bytes"],
       [
-        expiration,
-        maxNonce,
-        protocol.address,
-        sponsorshipRatio,
-        ethers.utils.arrayify(SignedMessageHash),
+      expiration,
+      maxNonce,
+      protocol.address,
+      sponsorshipRatio,
+      ethers.utils.arrayify(SignedMessageHash),
       ]
     );
+    console.log("expiration:", expiration.toString());
+    console.log("maxNonce:", maxNonce.toString());
+    console.log("protocol address:", protocol.address);
+    console.log("sponsorshipRatio:", sponsorshipRatio.toString());
+    console.log("SignedMessageHash:", ethers.utils.hexlify(SignedMessageHash));
+
+
 
     const paymasterParams = utils.getPaymasterParams(
       paymaster.address.toString(),
@@ -125,14 +136,14 @@ describe("ERC20SponsorPaymaster", () => {
         innerInput,
       }
     );
-    // console.log("paymasterInput:", paymasterParams);
+    console.log("paymasterInput:", paymasterParams);
     await (
       await erc20.connect(user).mint(user.address, 5, {
-        // maxPriorityFeePerGas: BigNumber.from(0),
+        maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: gasPrice,
         gasLimit: GAS_LIMIT,
         customData: {
-          paymasterParams: paymasterParams,
+          paymasterParams,
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
         },
       })

@@ -18,7 +18,7 @@ const Verifier_PK =
 const GAS_LIMIT = 4_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
-describe.skip("ERC20Paymaster", () => {
+describe.only("ERC20Paymaster", () => {
   const provider = getProvider();
   let admin: Wallet;
   let whale: Wallet;
