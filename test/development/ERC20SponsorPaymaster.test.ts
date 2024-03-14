@@ -17,8 +17,6 @@ import {
 } from "../testUtils";
 
 // puublic address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
-const Verifier_PK =
-  "0x8f6e509395c13960f501bc7083450ffd0948bc94103433d5843e5060a91756da";
 
 const GAS_LIMIT = 4_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
@@ -88,6 +86,7 @@ describe("ERC20SponsorPaymaster", () => {
     );
 
     const sponsorshipRatio = BigNumber.from(options?.sponsorshipRatio || 0);
+    console.log("sponsorshipRatio", sponsorshipRatio.toString());
 
     const messageHash = await getMessageHashSponsor(
       user.address,
@@ -126,12 +125,10 @@ describe("ERC20SponsorPaymaster", () => {
         innerInput,
       }
     );
-
-    // console.log("paymasterParams", paymasterParams);
-
+    // console.log("paymasterInput:", paymasterParams);
     await (
       await erc20.connect(user).mint(user.address, 5, {
-        maxPriorityFeePerGas: BigNumber.from(0),
+        // maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: gasPrice,
         gasLimit: GAS_LIMIT,
         customData: {
@@ -149,6 +146,7 @@ describe("ERC20SponsorPaymaster", () => {
     protocol = getWallet(LOCAL_RICH_WALLETS[4].privateKey);
 
     console.log("User address", user.address);
+    console.log("Protocol address", protocol.address);
 
     const newwallet = Wallet.createRandom();
     // console.log("newwallet", newwallet.address);
@@ -196,7 +194,7 @@ describe("ERC20SponsorPaymaster", () => {
       expect(ownerAddress).to.be.eql(admin.address);
     });
 
-    it("Should validate and pay for paymaster transaction", async () => {
+    it.only("Should validate and pay for paymaster transaction", async () => {
       await executeTransaction(user, erc20.address, "ApprovalBased");
       const newBalance = await user.getBalance();
       const newBalance_ERC20 = await erc20.balanceOf(user.address);

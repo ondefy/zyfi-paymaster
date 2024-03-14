@@ -113,7 +113,6 @@ export const deployContract = async (
   const log = (message: string) => {
     if (!options?.silent) console.log(message);
   };
-
   log(`\nStarting deployment process of "${contractArtifactName}"...`);
 
   const isLocalNetwork =
@@ -210,7 +209,7 @@ export const deployContract = async (
 
 export async function getUserNonce(address) {
   // This assumes you have already set up your Hardhat environment and you're calling this within an async function
-  
+
   // Get the provider from Hardhat's environment
   const provider = getProvider();
 
