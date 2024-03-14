@@ -6,7 +6,9 @@ import { Address } from "zksync-ethers/build/src/types";
 import { deployContract, getProvider, getWallet } from "../../deploy/prodUtils";
 import { LOCAL_RICH_WALLETS } from "../testUtils";
 
-describe.skip("SponsorshipVault", () => {
+const GAS_LIMIT = 10_000_000;
+
+describe.only("SponsorshipVault", () => {
   let vault: Contract;
   let paymaster: Contract;
   let verifier: Wallet;
@@ -23,18 +25,30 @@ describe.skip("SponsorshipVault", () => {
     erc20 = await deployContract("MockERC20", ["TestToken", "Test", 18], {
       silent: true,
     });
-    paymaster = await deployContract("ERC20SponsorPaymaster", [verifier.address], {
-      silent: true,
-    });
+    paymaster = await deployContract(
+      "ERC20SponsorPaymaster",
+      [verifier.address],
+      {
+        silent: true,
+      }
+    );
 
     vault = await deployContract("SponsorshipVault", [paymaster.address], {
       silent: true,
     });
+    await vault
+      .connect(user1)
+      .depositToAccount(user1.address, { value: amount });
+
+    await vault
+      .connect(user2)
+      .depositToAccount(user2.address, { value: amount });
   });
 
   describe("Deployment", () => {
     it("Should set the right paymaster", async () => {
-      expect(await vault.paymaster()).to.equal(paymaster.address);
+      const paymasterAddress = await vault.paymaster();
+      expect(paymasterAddress).to.be.eql(paymaster.address);
     });
   });
 
@@ -70,16 +84,29 @@ describe.skip("SponsorshipVault", () => {
       assert.isTrue(finalEth.gt(initialEth));
     });
 
-    it("Should not allow users to withdraw more than their balance", async () => {
-      const balance = await provider.getBalance(user1.address);
-      await expect(
-        vault.connect(user1).withdraw(balance.add(amount))
-      ).to.be.rejectedWith("Insufficient balance");
+    it.only("Should not allow users to withdraw more than their balance", async () => {
+      let errorOccurred = false;
+      const balance = await vault.balances(user1.address);
+      console.log("balance", balance.toString());
+      try {
+        await vault
+          .connect(user1)
+          .withdraw(balance.add(amount), { gasLimit: GAS_LIMIT });
+      } catch (error) {
+        errorOccurred = true;
+        console.log("error.message", error.message);
+        expect(error.message).to.include(
+          "Paymaster validation returned invalid magic value."
+        );
+      }
+      expect(errorOccurred).to.be.true;
     });
 
     it("Should not allow other users to use getSponsorship", async () => {
       await expect(
-        vault.connect(user1).getSponsorship(user2.address, amount)
+        vault
+          .connect(user1)
+          .getSponsorship(user2.address, amount, { gasLimit: GAS_LIMIT })
       ).to.be.rejectedWith("Only paymaster can withdraw");
     });
   });

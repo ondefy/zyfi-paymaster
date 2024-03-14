@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.23;
 import {Errors} from "./libraries/Errors.sol";
 
 contract SponsorshipVault {
     // Used to identify the contract version
     string public constant version = "1.0";
-    
+
     // Mapping from address to amount of ETH
     mapping(address => uint256) public balances;
 

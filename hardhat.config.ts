@@ -14,8 +14,7 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.era.zksync.dev",
       ethNetwork: "sepolia",
       zksync: true,
-      verifyURL:
-        "https://explorer.sepolia.era.zksync.dev/contract_verification",
+      verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
     },
     zkSyncMainnet: {
       url: "https://mainnet.era.zksync.io",
@@ -49,10 +48,10 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.23",
     settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-      },
+      // optimizer: {
+      //   enabled: true,
+      //   runs: 200,
+      // },
     },
   },
 };

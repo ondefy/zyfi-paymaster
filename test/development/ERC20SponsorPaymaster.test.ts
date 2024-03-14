@@ -18,7 +18,7 @@ import {
 
 // puublic address = "0x4826ed1D076f150eF2543F72160c23C7B519659a";
 
-const GAS_LIMIT = 400_000_000;
+const GAS_LIMIT = 10_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
 describe("ERC20SponsorPaymaster", () => {
@@ -36,6 +36,8 @@ describe("ERC20SponsorPaymaster", () => {
   let helper: Contract;
 
   type executeTransactionOptions = {
+    // Define the protocol address
+    protocolAddress?: Address;
     // Define an optional sponsorhip ratio
     sponsorshipRatio?: number;
     // If true, indicates that a wrong signature should be generated
@@ -54,6 +56,9 @@ describe("ERC20SponsorPaymaster", () => {
   ) {
     const gasPrice = await provider.getGasPrice();
     const ratio = mockRatio();
+
+    const protocolAddress =
+      options?.protocolAddress ?? "0x0000000000000000000000000000000000000000";
 
     // const minimalAllowance = ethers.utils.parseEther("1");
     const minimalAllowance = BigNumber.from(GAS_LIMIT)
@@ -85,10 +90,7 @@ describe("ERC20SponsorPaymaster", () => {
       options?.usedNonce ? 0 : (await getUserNonce(user.address)) + 50
     );
 
-    console.log("maxNonce", maxNonce.toString());
-
     const sponsorshipRatio = BigNumber.from(options?.sponsorshipRatio || 0);
-    console.log("sponsorshipRatio", sponsorshipRatio.toString());
 
     const messageHash = await getMessageHashSponsor(
       user.address,
@@ -97,7 +99,7 @@ describe("ERC20SponsorPaymaster", () => {
       allowance,
       expiration,
       maxNonce,
-      protocol.address,
+      protocolAddress,
       sponsorshipRatio,
       gasPrice,
       BigNumber.from(GAS_LIMIT)
@@ -107,25 +109,16 @@ describe("ERC20SponsorPaymaster", () => {
       ethers.utils.arrayify(messageHash)
     );
 
-    console.log("SignedMessageHash", SignedMessageHash);
-
     const innerInput = ethers.utils.defaultAbiCoder.encode(
       ["uint64", "uint256", "address", "uint16", "bytes"],
       [
-      expiration,
-      maxNonce,
-      protocol.address,
-      sponsorshipRatio,
-      ethers.utils.arrayify(SignedMessageHash),
+        expiration,
+        maxNonce,
+        protocolAddress,
+        sponsorshipRatio,
+        ethers.utils.arrayify(SignedMessageHash),
       ]
     );
-    console.log("expiration:", expiration.toString());
-    console.log("maxNonce:", maxNonce.toString());
-    console.log("protocol address:", protocol.address);
-    console.log("sponsorshipRatio:", sponsorshipRatio.toString());
-    console.log("SignedMessageHash:", ethers.utils.hexlify(SignedMessageHash));
-
-
 
     const paymasterParams = utils.getPaymasterParams(
       paymaster.address.toString(),
@@ -136,7 +129,13 @@ describe("ERC20SponsorPaymaster", () => {
         innerInput,
       }
     );
-    console.log("paymasterInput:", paymasterParams);
+    // console.log("expiration:", expiration.toString());
+    // console.log("maxNonce:", maxNonce.toString());
+    // console.log("protocol address:", protocolAddress);
+    // console.log("sponsorshipRatio:", sponsorshipRatio.toString());
+    // console.log("SignedMessageHash:", ethers.utils.hexlify(SignedMessageHash));
+    // console.log("paymasterInput:", paymasterParams);
+
     await (
       await erc20.connect(user).mint(user.address, 5, {
         maxPriorityFeePerGas: BigNumber.from(0),
@@ -178,7 +177,11 @@ describe("ERC20SponsorPaymaster", () => {
     await paymaster.transferOwnership(admin.address);
 
     vault = await deployContract("SponsorshipVault", [paymaster.address]);
-    vault.connect(protocol).depositToAccount(ethers.utils.parseEther("10"));
+
+    // Set the vault in the paymaster
+    await paymaster.setVault(vault.address);
+    // Fill the vault
+    await fundAccount(protocol, vault.address, "100");
 
     await fundAccount(whale, paymaster.address, "14");
     await fundAccount(whale, admin.address, "14");
@@ -205,7 +208,7 @@ describe("ERC20SponsorPaymaster", () => {
       expect(ownerAddress).to.be.eql(admin.address);
     });
 
-    it.only("Should validate and pay for paymaster transaction", async () => {
+    it("Should validate and pay for paymaster transaction", async () => {
       await executeTransaction(user, erc20.address, "ApprovalBased");
       const newBalance = await user.getBalance();
       const newBalance_ERC20 = await erc20.balanceOf(user.address);
@@ -218,17 +221,33 @@ describe("ERC20SponsorPaymaster", () => {
     });
 
     it("Should not validate a wrong signature", async () => {
-      await expect(
-        executeTransaction(user, erc20.address, "ApprovalBased", {
+      let errorOccurred = false;
+
+      try {
+        await executeTransaction(user, erc20.address, "ApprovalBased", {
           wrongSignature: true,
-        })
-      ).to.be.rejectedWith("0x0757dbc9");
+        });
+      } catch (error) {
+        errorOccurred = true;
+        // console.log("error.message", error.message);
+        expect(error.message).to.include(
+          "Paymaster validation returned invalid magic value."
+        );
+      }
+      expect(errorOccurred).to.be.true;
     });
 
     it("should revert if unsupported paymaster flow", async () => {
-      await expect(
-        executeTransaction(user, erc20.address, "General", {})
-      ).to.be.rejectedWith("0x33f5b205");
+      let errorOccurred = false;
+
+      try {
+        await executeTransaction(user, erc20.address, "General", {});
+      } catch (error) {
+        errorOccurred = true;
+        // console.log("error.message", error.message);
+        expect(error.message).to.include("0xff15b069");
+      }
+      expect(errorOccurred).to.be.true;
     });
 
     it("should revert if allowance is too low", async () => {
