@@ -21,7 +21,7 @@ import {
 const GAS_LIMIT = 10_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
-describe("ERC20SponsorPaymaster", () => {
+describe.only("ERC20SponsorPaymaster", () => {
   const provider = getProvider();
   let admin: Wallet;
   let whale: Wallet;
@@ -59,12 +59,17 @@ describe("ERC20SponsorPaymaster", () => {
 
     const protocolAddress =
       options?.protocolAddress ?? "0x0000000000000000000000000000000000000000";
+    const sponsorshipRatio = BigNumber.from(options?.sponsorshipRatio || 0).mul(
+      1e2
+    );
 
     // const minimalAllowance = ethers.utils.parseEther("1");
     const minimalAllowance = BigNumber.from(GAS_LIMIT)
       .mul(gasPrice)
       .mul(ratio)
-      .div(1e8);
+      .mul(BigNumber.from(1e4).sub(sponsorshipRatio))
+      .div(1e8)
+      .div(1e4); //Sponsorship denominator
     // console.log("minimalAllowance", minimalAllowance.toString());
 
     const currentTimestamp = await helper.getTimestamp();
@@ -89,8 +94,6 @@ describe("ERC20SponsorPaymaster", () => {
     const maxNonce = BigNumber.from(
       options?.usedNonce ? 0 : (await getUserNonce(user.address)) + 50
     );
-
-    const sponsorshipRatio = BigNumber.from(options?.sponsorshipRatio || 0);
 
     const messageHash = await getMessageHashSponsor(
       user.address,
@@ -171,15 +174,23 @@ describe("ERC20SponsorPaymaster", () => {
       silent: true,
     });
 
-    paymaster = await deployContract("ERC20SponsorPaymaster", [
-      verifier.address,
-    ]);
-    await paymaster.transferOwnership(admin.address);
+    paymaster = await deployContract(
+      "ERC20SponsorPaymaster",
+      [verifier.address],
+      {
+        silent: true,
+      }
+    );
+    console.log("paymaster address", paymaster.address);
 
-    vault = await deployContract("SponsorshipVault", [paymaster.address]);
-
+    vault = await deployContract("SponsorshipVault", [paymaster.address], {
+      silent: true,
+    });
+    console.log("vault address", vault.address);
     // Set the vault in the paymaster
     await paymaster.setVault(vault.address);
+    await paymaster.transferOwnership(admin.address);
+
     // Fill the vault
     await fundAccount(protocol, vault.address, "100");
 
@@ -343,21 +354,6 @@ describe("ERC20SponsorPaymaster", () => {
           )
       ).to.be.rejectedWith("Ownable: caller is not the owner");
     });
-
-    // it.skip("Should successfully upgrade the contract", async () => {
-    // 	const newPaymaster = await deployer.loadArtifact("PaymasterUpgrade");
-    // 	await (
-    // 		await hre.zkUpgrades.upgradeProxy(
-    // 			deployer.zkWallet,
-    // 			paymaster.address,
-    // 			newPaymaster,
-    // 			{ verifier: verifier.address },
-    // 			{
-    // 				initializer: "initialize",
-    // 			},
-    // 		)
-    // 	).wait();
-    // });
   });
 
   describe("V2 features", () => {
@@ -367,6 +363,32 @@ describe("ERC20SponsorPaymaster", () => {
           expiredtx: true,
         })
       ).to.be.rejectedWith("0xe397952c"); //tx expired
+    });
+    it("Should fail if the nonce is already used", async () => {
+      await executeTransaction(user, erc20.address, "ApprovalBased");
+      await expect(
+        executeTransaction(user, erc20.address, "ApprovalBased", {
+          usedNonce: true,
+        })
+      ).to.be.rejectedWith("0x756688fe"); //tx expired
+    });
+    it("Should allow a fully sponsored transaction", async () => {
+      initialBalance_ERC20 = await erc20.balanceOf(user.address);
+      await executeTransaction(user, erc20.address, "ApprovalBased", {
+        protocolAddress: protocol.address,
+        sponsorshipRatio: 100,
+      });
+      const newBalance_ERC20 = await erc20.balanceOf(user.address);
+      expect(newBalance_ERC20).to.be.eql(initialBalance_ERC20.add(5)); //minted amount
+    });
+    it("Should allow a half sponsored transaction", async () => {
+      initialBalance_ERC20 = await erc20.balanceOf(user.address);
+      await executeTransaction(user, erc20.address, "ApprovalBased", {
+        protocolAddress: protocol.address,
+        sponsorshipRatio: 50,
+      });
+      const newBalance_ERC20 = await erc20.balanceOf(user.address);
+      expect(newBalance_ERC20).to.be.lessThan(initialBalance_ERC20.add(5)); //minted amount
     });
   });
 

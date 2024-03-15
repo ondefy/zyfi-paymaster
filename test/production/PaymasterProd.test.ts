@@ -567,7 +567,7 @@ describe("ERC20PaymasterProd", () => {
 		console.log("Owner:", owner);
 	});
 
-	it.only("Change verifier", async () => {
+	it("Change verifier", async () => {
 		const verifier = "0xe65D3C2A9C43985763515Dd92099a4c63B1e108C";
 		// Use `getDeployTransaction` instead of `deploy` to return deployment data
 		const tx = await paymaster.populateTransaction.setVerifier(verifier);

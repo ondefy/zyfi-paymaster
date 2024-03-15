@@ -8,7 +8,7 @@ import { LOCAL_RICH_WALLETS } from "../testUtils";
 
 const GAS_LIMIT = 10_000_000;
 
-describe.only("SponsorshipVault", () => {
+describe("SponsorshipVault", () => {
   let vault: Contract;
   let paymaster: Contract;
   let verifier: Wallet;
@@ -84,7 +84,7 @@ describe.only("SponsorshipVault", () => {
       assert.isTrue(finalEth.gt(initialEth));
     });
 
-    it.only("Should not allow users to withdraw more than their balance", async () => {
+    it("Should not allow users to withdraw more than their balance", async () => {
       let errorOccurred = false;
       const balance = await vault.balances(user1.address);
       console.log("balance", balance.toString());

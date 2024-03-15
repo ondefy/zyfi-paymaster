@@ -22,11 +22,4 @@ export default async function () {
   console.log("Vault set in paymaster: ", tx.transactionHash);
 
   // await paymaster.transferOwnership(AdminAddress);
-  // const provider: Wallet = getWallet();
-  // console.log("Provider balance: ", (await provider.getBalance()).toString());
-  // await fundAccount(
-  //   provider,
-  //   "0xEcacba301285cE4308aAFc71319F9a670fdd1C7a",
-  //   "0.10"
-  // );
 }

@@ -14,7 +14,8 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.era.zksync.dev",
       ethNetwork: "sepolia",
       zksync: true,
-      verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
+      verifyURL:
+        "https://explorer.sepolia.era.zksync.dev/contract_verification",
     },
     zkSyncMainnet: {
       url: "https://mainnet.era.zksync.io",
@@ -33,6 +34,7 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8011",
       ethNetwork: "", // in-memory node doesn't support eth node; removing this line will cause an error
       zksync: true,
+      // verifyURL: "http://localhost:3010/contract_verification",
     },
     hardhat: {
       zksync: true,
@@ -48,10 +50,10 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.23",
     settings: {
-      // optimizer: {
-      //   enabled: true,
-      //   runs: 200,
-      // },
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
     },
   },
 };
