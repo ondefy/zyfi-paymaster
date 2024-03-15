@@ -13,7 +13,6 @@ export default async function () {
   const paymaster = await deployContract(
     "ERC20SponsorPaymaster",
     [verifierAddress],
-    {}
   );
 
   const vault = await deployContract("SponsorshipVault", [paymaster.address]);
