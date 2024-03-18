@@ -8,7 +8,7 @@ import { LOCAL_RICH_WALLETS } from "../testUtils";
 
 const GAS_LIMIT = 10_000_000;
 
-describe("SponsorshipVault", () => {
+describe.only("SponsorshipVault", () => {
   let vault: Contract;
   let paymaster: Contract;
   let verifier: Wallet;
@@ -55,6 +55,7 @@ describe("SponsorshipVault", () => {
   describe("Deposits", () => {
     it("Should accept deposits and update balances", async () => {
       const initialBalance = await provider.getBalance(user1.address);
+      const initialVaultBalance = await vault.balances(user1.address);
 
       await user1.sendTransaction({
         to: vault.address,
@@ -65,7 +66,7 @@ describe("SponsorshipVault", () => {
       const expectedBalance = initialBalance.sub(amount);
 
       // expect(finalBalance).to.equal(expectedBalance);
-      expect(await vault.balances(user1.address)).to.equal(amount);
+      expect(await vault.balances(user1.address)).to.equal(initialVaultBalance.add(amount));
     });
   });
 

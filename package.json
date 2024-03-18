@@ -11,7 +11,7 @@
     "test": "hardhat test --network hardhat test/development/**",
     "test:node": "hardhat test --network inMemoryNode test/development/**",
     "test:prod": "hardhat test --network zkSyncMainnet test/production/** ",
-    "deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncSepoliaTestnet",
+    "deploy": "yarn hardhat deploy-zksync --script deploy-paymaster.ts --network zkSyncMainnet",
     "check:prod": "hardhat run deploy/check-paymaster.ts --network zkSyncMainnet",
     "lint": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "compile": "hardhat compile",

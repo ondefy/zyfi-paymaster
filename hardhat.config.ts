@@ -5,7 +5,7 @@ import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-verify";
 import "@nomicfoundation/hardhat-chai-matchers";
 
-import { HardhatUserConfig } from "hardhat/config";
+import type { HardhatUserConfig } from "hardhat/config";
 
 const config: HardhatUserConfig = {
   defaultNetwork: "zkSyncSepoliaTestnet",
@@ -16,14 +16,15 @@ const config: HardhatUserConfig = {
       zksync: true,
       verifyURL:
         "https://explorer.sepolia.era.zksync.dev/contract_verification",
+      // "https://sepolia-era.zksync.network"
     },
     zkSyncMainnet: {
       url: "https://mainnet.era.zksync.io",
       ethNetwork: "mainnet",
       zksync: true,
       verifyURL:
-        "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
-      // "https://era.zksync.network"
+        // "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
+        "https://explorer.zksync.io/",
     },
     dockerizedNode: {
       url: "http://localhost:3050",
@@ -48,7 +49,7 @@ const config: HardhatUserConfig = {
     },
   },
   solidity: {
-    version: "0.8.20",
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,

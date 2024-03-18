@@ -21,7 +21,7 @@ import {
 const GAS_LIMIT = 10_000_000;
 const TX_EXPIRATION = 30 * 60; //30 minute
 
-describe.only("ERC20SponsorPaymaster", () => {
+describe("ERC20SponsorPaymaster", () => {
   const provider = getProvider();
   let admin: Wallet;
   let whale: Wallet;
