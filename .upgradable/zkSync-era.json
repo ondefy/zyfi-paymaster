@@ -12,7 +12,7 @@
       "address": "0xFf710763220d2F80edd4E36aF1Db830581e1f19a",
       "txHash": "0x3fae88dd021306faa20ad57bc6370e27f7053d1758812154112ea152ea5c16e9",
       "layout": {
-        "solcVersion": "0.8.20",
+        "solcVersion": "0.8.19",
         "storage": [
           {
             "label": "_initialized",
