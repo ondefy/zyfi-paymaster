@@ -55,21 +55,32 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
     // Address of the SponsorshipVault
     address public vault;
 
-    event VerifierChanged(address indexed newVerifier);
-    event VaultChanged(address indexed newVault);
     event DefaultMarkupChanged(uint256 newMarkup);
     event MarkupChanged(address indexed protocol, uint256 newMarkup);
+    event RefundedNative(address indexed protocolAddress, uint256 amount);
     event RefundedToken(
         address indexed account,
         address indexed token,
         uint256 amount
     );
+    event SponsoredPaymasterTransaction(
+        address indexed userAddress, 
+        address indexed transactionTo, 
+        address indexed protocolAddress, 
+        uint256 requiredETH, 
+        uint256 sponsorshipRatio, 
+        uint256 requiredETHProtocol, 
+        address token, 
+        uint256 amount
+    );
+    event VaultChanged(address indexed newVault);
+    event VerifierChanged(address indexed newVerifier);
 
     modifier onlyBootloader() {
         if (msg.sender != BOOTLOADER_FORMAL_ADDRESS) {
             revert Errors.NotFromBootloader();
         }
-        // Continue execution if called from the bootloader.
+        // Continue execution only if called from the bootloader.
         _;
     }
 
@@ -137,13 +148,14 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         if (_transaction.nonce > maxNonce) revert Errors.InvalidNonce();
 
         address userAddress = address(uint160(_transaction.from));
+        address transactionTo = address(uint160(_transaction.to));
 
         //Validate that the message was signed by the Zyfi api
         if (
             !_isValidSignature(
                 signedMessage,
                 userAddress,
-                address(uint160(_transaction.to)),
+                transactionTo,
                 token,
                 amount,
                 expirationTime,
@@ -206,6 +218,9 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
             protocolAddress,
             requiredETHProtocol
         );
+
+        emit SponsoredPaymasterTransaction(userAddress, transactionTo, protocolAddress, requiredETH, sponsorshipRatio, requiredETHProtocol, token, amount);
+
     }
 
     function postTransaction(
@@ -224,7 +239,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         ) = abi.decode(_context, (address, uint256, address, uint256));
 
         // Processes the refund fairly between user and protocol.
-        // E.g. If the user paid 60%, he is gets 60% of the refund, the rest is sent to the protocol
+        // E.g. If the user paid 60%, he gets 60% of the refund, the rest is sent to the protocol
 
         // Refund the protocol if it sponsored the transaction
         if (requiredETHProtocol > 0) {
@@ -235,6 +250,8 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
             ISponsorshipVault(vault).refundSponsorship{
                 value: refundEthProtocol
             }(protocolAddress);
+            
+            emit RefundedNative(protocolAddress, refundEthProtocol);
         }
 
         // Refund the user
