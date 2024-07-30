@@ -64,8 +64,6 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         uint256 amount
     );
     event SponsoredPaymasterTransaction(
-        address indexed userAddress, 
-        address indexed transactionTo, 
         address indexed protocolAddress, 
         uint256 requiredETH, 
         uint256 sponsorshipRatio, 
@@ -148,14 +146,13 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         if (_transaction.nonce > maxNonce) revert Errors.InvalidNonce();
 
         address userAddress = address(uint160(_transaction.from));
-        address transactionTo = address(uint160(_transaction.to));
 
         //Validate that the message was signed by the Zyfi api
         if (
             !_isValidSignature(
                 signedMessage,
                 userAddress,
-                transactionTo,
+                address(uint160(_transaction.to)),
                 token,
                 amount,
                 expirationTime,
@@ -219,7 +216,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
             requiredETHProtocol
         );
 
-        emit SponsoredPaymasterTransaction(userAddress, transactionTo, protocolAddress, requiredETH, sponsorshipRatio, requiredETHProtocol, token, amount);
+        emit SponsoredPaymasterTransaction(protocolAddress, requiredETH, sponsorshipRatio, requiredETHProtocol, token, amount);
 
     }
 
