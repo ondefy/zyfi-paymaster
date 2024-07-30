@@ -18,6 +18,6 @@ export default async function () {
     console.log(`Deployed to ${paymaster.address}`);
 
     // Fund the paymaster
-    // await fundAccount(getWallet(), paymaster.address, "0.5");
+    await fundAccount(getWallet(), paymaster.address, "0.1");
     // await paymaster.transferOwnership(AdminAddress);
 }

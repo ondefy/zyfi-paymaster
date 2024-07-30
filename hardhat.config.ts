@@ -31,6 +31,11 @@ const config: HardhatUserConfig = {
             ethNetwork: "",
             zksync: true,
         },
+        abstractTestnet: {
+            url: "https://api.testnet.abs.xyz",
+            ethNetwork: "",
+            zksync: true,
+        },
         dockerizedNode: {
             url: "http://localhost:3050",
             ethNetwork: "http://localhost:8545",
