@@ -64,10 +64,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
         uint256 amount
     );
     event SponsoredPaymasterTransaction(
-        address indexed protocolAddress, 
-        uint256 requiredETH, 
         uint256 sponsorshipRatio, 
-        uint256 requiredETHProtocol, 
         address token, 
         uint256 amount
     );
@@ -216,7 +213,7 @@ contract ERC20SponsorPaymaster is IPaymaster, Ownable {
             requiredETHProtocol
         );
 
-        emit SponsoredPaymasterTransaction(protocolAddress, requiredETH, sponsorshipRatio, requiredETHProtocol, token, amount);
+        emit SponsoredPaymasterTransaction(sponsorshipRatio, token, amount);
 
     }
 

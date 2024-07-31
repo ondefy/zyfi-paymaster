@@ -41,7 +41,6 @@ contract ERC20Paymaster is IPaymaster, Ownable {
     string public constant version = "1.0";
 
     event ERC20PaymasterTransaction(
-        uint256 requiredETH, 
         address token, 
         uint256 amount
     );
@@ -154,7 +153,7 @@ contract ERC20Paymaster is IPaymaster, Ownable {
         // Encode context to process refunds
         context = abi.encode(token, amount);
 
-        emit ERC20PaymasterTransaction(requiredETH, token, amount);
+        emit ERC20PaymasterTransaction(token, amount);
     }
 
     function postTransaction(
