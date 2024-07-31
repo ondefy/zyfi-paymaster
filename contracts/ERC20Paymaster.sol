@@ -40,12 +40,16 @@ contract ERC20Paymaster is IPaymaster, Ownable {
     // Used to identify the contract version
     string public constant version = "1.0";
 
-    event VerifierChanged(address indexed newVerifier);
+    event ERC20PaymasterTransaction(
+        address token, 
+        uint256 amount
+    );
     event RefundedToken(
         address indexed account,
         address indexed token,
         uint256 amount
     );
+    event VerifierChanged(address indexed newVerifier);
 
     modifier onlyBootloader() {
         if (msg.sender != BOOTLOADER_FORMAL_ADDRESS) {
@@ -148,6 +152,8 @@ contract ERC20Paymaster is IPaymaster, Ownable {
 
         // Encode context to process refunds
         context = abi.encode(token, amount);
+
+        emit ERC20PaymasterTransaction(token, amount);
     }
 
     function postTransaction(
