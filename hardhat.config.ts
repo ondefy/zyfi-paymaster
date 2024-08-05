@@ -7,6 +7,9 @@ import "@matterlabs/hardhat-zksync-verify";
 import "@nomicfoundation/hardhat-chai-matchers";
 
 import type { HardhatUserConfig } from "hardhat/config";
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const config: HardhatUserConfig = {
     defaultNetwork: "zkSyncSepoliaTestnet",
@@ -35,6 +38,7 @@ const config: HardhatUserConfig = {
             url: "https://api.testnet.abs.xyz",
             ethNetwork: "",
             zksync: true,
+            accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
         },
         dockerizedNode: {
             url: "http://localhost:3050",
