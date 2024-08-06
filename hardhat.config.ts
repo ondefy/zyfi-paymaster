@@ -7,17 +7,13 @@ import "@matterlabs/hardhat-zksync-verify";
 import "@nomicfoundation/hardhat-chai-matchers";
 
 import type { HardhatUserConfig } from "hardhat/config";
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const config: HardhatUserConfig = {
     defaultNetwork: "zkSyncSepoliaTestnet",
     networks: {
-        zkSyncSepoliaTestnet: {
-            url: "https://sepolia.era.zksync.dev",
-            ethNetwork: "sepolia",
-            zksync: true,
-            verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
-            // "https://sepolia-era.zksync.network"
-        },
         zkSyncMainnet: {
             url: "https://mainnet.era.zksync.io",
             ethNetwork: "mainnet",
@@ -25,6 +21,21 @@ const config: HardhatUserConfig = {
             verifyURL:
                 // "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
                 "https://explorer.zksync.io/",
+        },
+        zkSyncSepoliaTestnet: {
+            url: "https://sepolia.era.zksync.dev",
+            ethNetwork: "sepolia",
+            zksync: true,
+            verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
+            // "https://sepolia-era.zksync.network"
+        },
+        cronosZkEvm: {
+            url: "https://gs.zkevm.cronos.org",
+            ethNetwork: "",
+            zksync: true,
+            httpHeaders: {
+                "X-API-KEY": `${process.env.CRONOS_X_API_KEY}`
+            }
         },
         cronosZkEvmTestnet: {
             url: "https://testnet.zkevm.cronos.org",
@@ -35,6 +46,7 @@ const config: HardhatUserConfig = {
             url: "https://api.testnet.abs.xyz",
             ethNetwork: "",
             zksync: true,
+            accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
         },
         dockerizedNode: {
             url: "http://localhost:3050",

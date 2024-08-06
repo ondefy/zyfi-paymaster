@@ -1,13 +1,13 @@
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { BigNumberish, ethers } from "ethers";
-import { formatEther } from "ethers/lib/utils";
 import * as hre from "hardhat";
 import { Contract, Provider, Wallet } from "zksync-ethers";
 
 import "@matterlabs/hardhat-zksync-node/dist/type-extensions";
 import "@matterlabs/hardhat-zksync-verify/dist/src/type-extensions";
-import { Address } from "zksync-ethers/build/src/types";
 import { LOCAL_RICH_WALLETS } from "../test/testUtils";
+import { formatEther, parseEther } from "@ethersproject/units";
+import { Address } from "zksync-ethers/build/src/types";
 
 export const getProvider = () => {
   const rpcUrl = hre.network.config.url;
@@ -47,7 +47,7 @@ export async function fundAccount(
   await (
     await wallet.sendTransaction({
       to: address,
-      value: ethers.utils.parseEther(amount),
+      value: parseEther(amount),
     })
   ).wait();
   console.log(`Funded ${address} with ${amount} ETH`);
@@ -166,7 +166,7 @@ export const deployContract = async (
     if (!options?.noVerify && hre.network.config.verifyURL) {
       log("Requesting contract verification...");
       await verifyContract({
-        address: contract.address,
+        address: await contract.getAddress(),
         contract: fullContractSource,
         constructorArguments: constructorArgs,
         bytecode: artifact.bytecode,
