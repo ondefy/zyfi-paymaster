@@ -30,12 +30,10 @@ const config: HardhatUserConfig = {
             // "https://sepolia-era.zksync.network"
         },
         cronosZkEvm: {
-            url: "https://gs.zkevm.cronos.org",
-            ethNetwork: "",
+            url: "https://mainnet.zkevm.cronos.org",
+            ethNetwork: "mainnet",
             zksync: true,
-            httpHeaders: {
-                "X-API-KEY": `${process.env.CRONOS_X_API_KEY}`
-            }
+            verifyURL: "https://explorer-api.zkevm.cronos.org/api/v1/contract/verify/hardhat?apikey=QW5UgjuwXIJULlHi9ZY0i9vEqo72eNzX"
         },
         cronosZkEvmTestnet: {
             url: "https://testnet.zkevm.cronos.org",
