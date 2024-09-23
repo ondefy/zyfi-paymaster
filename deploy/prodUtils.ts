@@ -7,7 +7,7 @@ import "@matterlabs/hardhat-zksync-node/dist/type-extensions";
 import "@matterlabs/hardhat-zksync-verify/dist/src/type-extensions";
 import { LOCAL_RICH_WALLETS } from "../test/testUtils";
 import { formatEther, parseEther } from "@ethersproject/units";
-import { Address } from "zksync-ethers/build/src/types";
+import { Address } from "zksync-ethers/build/types";
 
 export const getProvider = () => {
   const rpcUrl = hre.network.config.url;
@@ -47,19 +47,16 @@ export async function fundAccount(
   await (
     await wallet.sendTransaction({
       to: address,
-      value: parseEther(amount),
+      value: parseEther(amount).toBigInt(),
     })
   ).wait();
   console.log(`Funded ${address} with ${amount} ETH`);
 }
 
-export const verifyEnoughBalance = async (
-  wallet: Wallet,
-  amount: BigNumberish
-) => {
+export const verifyEnoughBalance = async (wallet: Wallet, amount: bigint) => {
   // Check if the wallet has enough balance
   const balance = await wallet.getBalance();
-  if (balance.lt(amount))
+  if (balance < amount)
     throw `⛔️ Wallet balance is too low! Required ${formatEther(
       amount
     )} ETH, but current ${wallet.address} balance is ${formatEther(
@@ -159,7 +156,7 @@ export const deployContract = async (
 
     // Display contract deployment info
     log(`\n"${artifact.contractName}" was successfully deployed:`);
-    log(` - Contract address: ${contract.address}`);
+    log(` - Contract address: ${await contract.getAddress()}`);
     log(` - Contract source: ${fullContractSource}`);
     log(` - Encoded constructor arguments: ${constructorArgs}\n`);
 
@@ -193,15 +190,17 @@ export const deployContract = async (
     // await verifyEnoughBalance(wallet, deploymentFee);
 
     // Deploy the contract to zkSync
-    contract = await hre.zkUpgrades.deployProxy(
-      deployer.zkWallet,
-      artifact,
-      constructorArguments,
-      {
-        initializer: "initialize",
-      }
-    );
-    await contract.deployed();
+
+    throw new Error("!upgrades");
+    // contract = await hre.zkUpgrades.deployProxy(
+    //   deployer.zkWallet,
+    //   artifact,
+    //   constructorArguments,
+    //   {
+    //     initializer: "initialize",
+    //   }
+    // );
+    // await contract.deployed();
   }
 
   return contract;
