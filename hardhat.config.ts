@@ -1,10 +1,10 @@
 import "@matterlabs/hardhat-zksync-ethers";
 import "@matterlabs/hardhat-zksync-chai-matchers";
-import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-node";
 import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-verify";
-import "@nomicfoundation/hardhat-chai-matchers";
+import "@matterlabs/hardhat-zksync-deploy";
+// import "@nomicfoundation/hardhat-chai-matchers";
 
 import type { HardhatUserConfig } from "hardhat/config";
 import dotenv from "dotenv"
@@ -37,8 +37,10 @@ const config: HardhatUserConfig = {
         },
         cronosZkEvmTestnet: {
             url: "https://testnet.zkevm.cronos.org",
-            ethNetwork: "",
+            ethNetwork: "sepolia",
             zksync: true,
+            accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
+            verifyURL: `https://explorer-api.testnet.zkevm.cronos.org/api/v1/contract/verify/hardhat?apikey=${process.env.CRONOS_API_KEY_TESTNET}`,
         },
         abstractTestnet: {
             url: "https://api.testnet.abs.xyz",
