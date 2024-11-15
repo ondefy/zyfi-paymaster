@@ -42,6 +42,12 @@ const config: HardhatUserConfig = {
             accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
             verifyURL: `https://explorer-api.testnet.zkevm.cronos.org/api/v1/contract/verify/hardhat?apikey=${process.env.CRONOS_API_KEY_TESTNET}`,
         },
+        abstract: {
+            url: "https://api.raas.matterhosted.dev/",
+            ethNetwork: "mainnet",
+            zksync: true,
+            verifyURL: "https://api-explorer-verify.raas.matterhosted.dev/contract_verification"
+        },
         abstractTestnet: {
             url: "https://api.testnet.abs.xyz",
             ethNetwork: "",
