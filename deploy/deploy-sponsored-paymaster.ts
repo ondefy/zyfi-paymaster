@@ -21,7 +21,7 @@ export default async function () {
     console.log("Vault set in paymaster: ", tx.hash);
 
     // Fund the paymaster
-    await fundAccount(getWallet(), await paymaster.getAddress(), "1000");
+    await fundAccount(getWallet(), await paymaster.getAddress(), "0.1");
 
     // await paymaster.transferOwnership(AdminAddress);
 }

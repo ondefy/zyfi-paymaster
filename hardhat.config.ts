@@ -54,6 +54,14 @@ const config: HardhatUserConfig = {
             zksync: true,
             accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
         },
+        treasureTopazTestnet: {
+            chainId: 978658,
+            url: "https://rpc.topaz.treasure.lol",
+            ethNetwork: "",
+            zksync: true,
+            verifyURL: "https://rpc-explorer-verify.topaz.treasure.lol/contract_verification",
+            accounts: [`${process.env.WALLET_PRIVATE_KEY}`],
+        },
         dockerizedNode: {
             url: "http://localhost:3050",
             ethNetwork: "http://localhost:8545",
