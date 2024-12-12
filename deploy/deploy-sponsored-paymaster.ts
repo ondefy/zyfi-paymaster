@@ -3,10 +3,10 @@ import { deployContract, fundAccount, getWallet } from "./prodUtils";
 
 export default async function () {
     // Mainnet
-    // const verifierAddress: Address = "0xe65D3C2A9C43985763515Dd92099a4c63B1e108C";
+    const verifierAddress = "0xe65D3C2A9C43985763515Dd92099a4c63B1e108C";
 
     // Testnet
-    const verifierAddress = "0xa5A40aBBb41Ecb9379fE4E19Fcbc1788B8bFdE59";
+    // const verifierAddress = "0xa5A40aBBb41Ecb9379fE4E19Fcbc1788B8bFdE59";
 
     // const AdminAddress: Address = "0xeacA6dB0aEe62c87a69C3d6Bcf6BCcc9388b7565";
 
@@ -21,7 +21,7 @@ export default async function () {
     console.log("Vault set in paymaster: ", tx.hash);
 
     // Fund the paymaster
-    await fundAccount(getWallet(), await paymaster.getAddress(), "0.1");
+    await fundAccount(getWallet(), await paymaster.getAddress(), "100");
 
     // await paymaster.transferOwnership(AdminAddress);
 }
