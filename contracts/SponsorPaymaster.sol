@@ -40,7 +40,7 @@ contract SponsorPaymaster is IPaymaster, Ownable, EIP712 {
     
     bytes32 public constant SIGNATURE_TYPEHASH =
         keccak256(
-            "SponsorPaymaster(address from,address to,uint64 expirationTime,uint256 maxNonce,uint256 maxFeePerGas,uint256 gasLimit)"
+            "SponsorPaymaster(address from,address to,address protocolAddress,uint64 expirationTime,uint256 maxNonce,uint256 maxFeePerGas,uint256 gasLimit)"
         );
 
     // The nominator used for markup calculations
@@ -150,9 +150,9 @@ contract SponsorPaymaster is IPaymaster, Ownable, EIP712 {
                 signedMessage,
                 userAddress,
                 address(uint160(_transaction.to)),
+                protocolAddress,
                 expirationTime,
                 maxNonce,
-                protocolAddress,
                 _transaction.maxFeePerGas,
                 _transaction.gasLimit
             )
@@ -161,8 +161,6 @@ contract SponsorPaymaster is IPaymaster, Ownable, EIP712 {
             // magic is set to 0 so it fails on mainnet while still allowing for gas estimation
             magic = bytes4(0);
         }
-
-        address thisAddress = address(this);
 
         // Note, that while the minimal amount of ETH needed is tx.gasPrice * tx.gasLimit,
         // neither paymaster nor account are allowed to access this context variable.
@@ -239,9 +237,9 @@ contract SponsorPaymaster is IPaymaster, Ownable, EIP712 {
      * @param signature The signature to be validated.
      * @param from The address of the sender.
      * @param to The address of the recipient.
+     * @param protocolAddress The address of the protocol contract.
      * @param expirationTime The expiration time for the transaction.
      * @param maxNonce The maximum nonce for the transaction.
-     * @param protocolAddress The address of the protocol contract.
      * @param maxFeePerGas The maximum fee per gas for the transaction.
      * @param gasLimit The gas limit for the transaction.
      * @return A boolean indicating whether the signature is valid or not.
@@ -250,20 +248,21 @@ contract SponsorPaymaster is IPaymaster, Ownable, EIP712 {
         bytes memory signature,
         address from,
         address to,
+        address protocolAddress,
         uint64 expirationTime,
         uint256 maxNonce,
-        address protocolAddress,
         uint256 maxFeePerGas,
         uint256 gasLimit
     ) internal view returns (bool) {
 
         bytes32 messageHash = keccak256(
             abi.encodePacked(
+                SIGNATURE_TYPEHASH,
                 from,
                 to,
+                protocolAddress,
                 expirationTime,
                 maxNonce,
-                protocolAddress,
                 maxFeePerGas,
                 gasLimit
             )
